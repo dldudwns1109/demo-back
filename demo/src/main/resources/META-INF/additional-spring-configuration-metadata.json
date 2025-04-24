@@ -1,0 +1,52 @@
+{"properties": [
+  {
+    "name": "custom.email.username",
+    "type": "java.lang.String",
+    "description": "A description for 'custom.email.username'"
+  },
+  {
+    "name": "custom.email.password",
+    "type": "java.lang.String",
+    "description": "A description for 'custom.email.password'"
+  },
+  {
+    "name": "custom.token.issuer",
+    "type": "java.lang.String",
+    "description": "A description for 'custom.token.issuer'"
+  },
+  {
+    "name": "custom.token.secret-key",
+    "type": "java.lang.String",
+    "description": "A description for 'custom.token.secret-key'"
+  },
+  {
+    "name": "custom.token.access-limit",
+    "type": "java.lang.String",
+    "description": "A description for 'custom.token.access-limit'"
+  },
+  {
+    "name": "custom.token.refresh-limit",
+    "type": "java.lang.String",
+    "description": "A description for 'custom.token.refresh-limit'"
+  },
+  {
+    "name": "custom.token.renewal-limit",
+    "type": "java.lang.String",
+    "description": "A description for 'custom.token.renewal-limit'"
+  },
+  {
+    "name": "custom.fileupload.root",
+    "type": "java.lang.String",
+    "description": "A description for 'custom.fileupload.root'"
+  },
+  {
+    "name": "custom.kakao.secret-key",
+    "type": "java.lang.String",
+    "description": "A description for 'custom.kakao.secret-key'"
+  },
+  {
+    "name": "custom.kakao.cid",
+    "type": "java.lang.String",
+    "description": "A description for 'custom.kakao.cid'"
+  }
+]}
