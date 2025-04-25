@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="member">
+	<select id="sequence" resultType="long">
+		select member_seq.nextval from dual
+	</select>
+	<insert id="insert">
+		insert into member (
+			member_no, member_id, member_pw, member_nickname,
+			member_email, member_location, member_school, 
+			member_gender, member_birth, member_like, member_mbti
+		) values (
+			#{memberNo}, #{memberId}, #{memberPw}, #{memberNickname},
+			#{memberEmail}, #{memberLocation}, #{memberSchool},
+			#{memberGender}, #{memberBirth}, #{memberLike}, #{memberMbti}
+		)
+	</insert>
+	
+	<select id="findMember" resultType="MemberDto">
+		select * from member
+		where member_id = #{memberId}
+	</select>
+	
+	<select id="findMemberByEmail" resultType="MemberDto">
+		select * from member
+		where member_email = #{memberEmail}
+	</select>
+	
+	<select id="findId" resultType="String">
+		select member_id from member 
+		where member_email = #{memberEmail}
+	</select>
+	
+	<update id="updatePassword">
+		update member
+		set member_pw = #{memberPw}
+		where member_email = #{memberEmail}
+	</update>
+</mapper>
