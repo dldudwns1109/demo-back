@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="board">
+
+	<!-- 게시글 목록 전체 조회 -->
+	<select id="selectList" resultType="BoardVO">
+		select
+		board.board_no,
+		board.board_title,
+		board.board_category,
+		board.board_content,
+		member.member_nickname as board_writer_nickname,
+		member_profile.attachment_no as board_writer_profile_url,
+		board.board_wtime as board_write_time,
+		board.board_reply
+		from board
+		left outer join member on board.board_writer = member.member_no
+		left outer join member_profile on member.member_no =
+		member_profile.member_no
+		order by board.board_no desc
+	</select>
+
+	<!-- 카테고리별 게시글 목록 -->
+	<select id="selectListByCategory" resultType="BoardVO">
+		select
+		board.board_no,
+		board.board_title,
+		board.board_category,
+		board.board_content,
+		member.member_nickname as board_writer_nickname,
+		member_profile.attachment_no as board_writer_profile_url,
+		board.board_wtime as board_write_time,
+		board.board_reply
+		from board
+		left outer join member on board.board_writer = member.member_no
+		left outer join member_profile on member.member_no =
+		member_profile.member_no
+		where board.board_category = #{category}
+		order by board.board_no desc
+	</select>
+
+	<!-- 게시글 상세 조회 -->
+	<select id="selectOne" resultType="BoardDto">
+		select * from board where board_no = #{boardNo}
+	</select>
+
+	<!-- 게시글 등록 -->
+	<insert id="insert">
+		insert into board (
+			board_no, board_group_no, board_title, board_category,
+			board_writer, board_write_time, board_content, board_reply
+		) values (
+			board_seq.nextval, #{boardGroupNo}, #{boardTitle}, #{boardCategory},
+			#{boardWriter}, systimestamp, #{boardContent}, 0
+		)
+	</insert>
+
+	<!-- 게시글 수정 -->
+	<update id="update">
+		UPDATE board
+		SET board_title = #{boardTitle},
+			board_content = #{boardContent},
+			board_category = #{boardCategory}
+		WHERE board_no = #{boardNo}
+	</update>
+
+	<!-- 게시글 삭제 -->
+	<delete id="delete">
+		delete from board where board_no = #{boardNo}
+	</delete>
+	
+</mapper>
+
+
+
+
+
+
+
+
+
+
