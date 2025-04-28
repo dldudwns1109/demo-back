@@ -106,4 +106,20 @@ public class MemberRestController {
 	    memberDao.update(memberDto);
 	}
 	
+	@DeleteMapping("/{memberId}")
+	public void deleteMember(@PathVariable String memberId) {
+	    MemberDto findDto = memberDao.findMember(memberId);
+	    if (findDto == null) throw new RuntimeException("회원이 존재하지 않습니다");
+
+	    memberDao.deleteMember(findDto.getMemberNo());
+	}
+	
+	@GetMapping("/mypage/{memberId}")
+    public MemberDto MyPage(@PathVariable String memberId) {
+        MemberDto memberDto = memberDao.findMember(memberId);
+        if (memberDto == null) 
+            throw new TargetNotFoundException();
+        return memberDto;
+    }
+	
 }
