@@ -58,7 +58,7 @@ public class BoardRestController {
 		boardService.insert(boardDto);
 	}
 
-	//게시글을 수정하는 메서드입니다
+	//게시글 수정
 	//1.게시글 존재 여부 확인
 	//2.작성자 본인인지 확인
 	@PutMapping("/{boardNo}")
@@ -66,8 +66,9 @@ public class BoardRestController {
 		BoardDto target = boardService.get(boardNo);
 		if (target == null)
 			throw new TargetNotFoundException();
-		if (target.getBoardWriter() != boardDto.getBoardWriter())
-			throw new TargetNotFoundException();
+		//임시로 작성자 검증 생략 (로그인 기능 X)
+//		if (target.getBoardWriter() != boardDto.getBoardWriter())
+//			throw new TargetNotFoundException();
 		boardDto.setBoardNo(boardNo);
 		return boardService.edit(boardDto);
 	}
@@ -76,12 +77,13 @@ public class BoardRestController {
 	//1.게시글 존재 여부 확인
 	//2.작성자 본인인지 확인 (작성자만 삭제 가능)
 	@DeleteMapping("/{boardNo}")
-	public boolean delete(@PathVariable Long boardNo, @RequestBody BoardDto boardDto) {
+	public boolean delete(@PathVariable Long boardNo) {
 		BoardDto target = boardService.get(boardNo);
 		if (target == null)
 			throw new TargetNotFoundException();
-		if (target.getBoardWriter() != boardDto.getBoardWriter())
-			throw new TargetNotFoundException();
+		//임시로 작성자 검증 생략 (로그인 기능 X)
+//		if (target.getBoardWriter() != boardDto.getBoardWriter())
+//			throw new TargetNotFoundException();
 		return boardService.delete(boardNo);
 	}
 

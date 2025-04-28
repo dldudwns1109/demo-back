@@ -49,7 +49,22 @@
 
     <!-- 게시글 상세 조회 -->
 	<select id="selectOne" resultType="BoardDto">
-		select * from board where board_no = #{boardNo}
+		select
+        	board.board_no,
+        	board.board_crew_no,
+        	board.board_title,
+        	board.board_category,
+        	board.board_writer,
+        	board.board_wtime as board_write_time,
+        	board.board_content,
+        	board.board_reply,
+        	member.member_nickname as board_writer_nickname,
+        	member.member_gender as board_writer_gender,
+        	member.member_birth as board_writer_birth,
+        	member.member_mbti as board_writer_mbti
+    	from board
+    	left join member on board.board_writer = member.member_no
+    	where board.board_no = #{boardNo}
 	</select>
 
 	<!-- 게시글 등록 -->
