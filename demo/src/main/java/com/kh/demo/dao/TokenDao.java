@@ -27,4 +27,12 @@ public class TokenDao {
 	public boolean delete(TokenDto tokenDto) {
 		return sqlSession.delete("token.delete", tokenDto) > 0;
 	}
+	
+	public boolean clean(String tokenTarget) {
+		return sqlSession.delete("token.deleteByTokenTarget", tokenTarget) > 0;
+	}
+	
+	public boolean clean(TokenDto tokenDto) {
+		return sqlSession.delete("token.deleteByTokenTarget", tokenDto) > 0;
+	}
 }

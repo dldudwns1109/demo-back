@@ -23,4 +23,9 @@
 	<delete id="delete">
 		delete token where token_no = #{tokenNo}
 	</delete>
+	
+	<delete id="deleteByTokenTarget">
+		delete token 
+		where token_target = #{tokenTarget}
+	</delete>
 </mapper>
