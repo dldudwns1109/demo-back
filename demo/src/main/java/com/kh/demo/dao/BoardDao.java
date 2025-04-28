@@ -45,6 +45,7 @@ public class BoardDao {
 	public boolean delete(Long boardNo) {
 		return sqlSession.delete("board.delete", boardNo) > 0;
 	}
+	
 }
 
 

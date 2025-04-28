@@ -15,6 +15,10 @@ public class BoardVO {
 	private Timestamp boardWriteTime; // 사용자에게 보여주기 위한 작성 시간 (예: "2025.04.24 14:23")
 	private long boardReply; // 댓글 수
 	private String boardContent; // 글 내용
+	
+    private String boardWriterGender;
+    private String boardWriterBirth;
+    private String boardWriterMbti;
 
 	// 작성 시간 포맷팅된 문자열을 반환하는 메서드
 	public String getFormattedWriteTime() {
@@ -22,4 +26,11 @@ public class BoardVO {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy년 MM월 dd일 HH시 mm분");
 		return sdf.format(boardWriteTime);
 	}
+	
+	public String getFormattedWriterBirth() {
+	    if (boardWriterBirth == null) return "";
+	    return boardWriterBirth.replace("-", "년 ").replaceFirst("-", "월 ") + "일";
+	}
+
+
 }
