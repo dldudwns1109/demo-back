@@ -35,4 +35,12 @@ public class MemberDao {
 	public boolean updatePassword(MemberDto memberDto) {
 		return sqlSession.update("member.updatePassword", memberDto) > 0;
 	}
+	
+	public boolean update(MemberDto memberDto) {
+		return sqlSession.update("member.editUnit", memberDto) > 0;
+	}
+
+	public void deleteMember(long memberNo) {
+	    sqlSession.delete("member.deleteMember", memberNo);
+	}
 }

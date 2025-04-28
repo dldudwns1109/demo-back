@@ -92,4 +92,18 @@ public class MemberRestController {
 	public void findPw(@PathVariable String memberEmail) throws MessagingException, IOException {
 		memberService.sendTempPassword(memberEmail);
 	}
+	
+	@PatchMapping("/{memberId}")
+	public void edit(@PathVariable String memberId, 
+						@RequestBody MemberDto memberDto) {
+		memberDto.setMemberId(memberId);
+		
+	    MemberDto findDto = memberDao.findMember(memberId);
+	    if (findDto == null) throw new RuntimeException("대상 회원이 없습니다");
+
+	    memberDto.setMemberNo(findDto.getMemberNo());
+
+	    memberDao.update(memberDto);
+	}
+	
 }
