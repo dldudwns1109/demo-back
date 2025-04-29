@@ -67,7 +67,7 @@ public class TokenService {
 									.parse(token)
 									.getPayload();
 		
-		return (long) claims.get("memberNo");
+		return ((Integer) claims.get("memberNo")).longValue();
 	}
 	
 	public long parseBearerToken(String bearerToken) {
