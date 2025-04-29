@@ -22,4 +22,6 @@ public class BoardDto {
 	private String boardWriterGender; //작성자 성별
 	private String boardWriterBirth; //작성자 생일
 	private String boardWriterMbti; //작성자 mbti
+	private String boardWriterLocation; //작성자 사는지역
+	private String boardWriterSchool; //작성자 학교
 }
