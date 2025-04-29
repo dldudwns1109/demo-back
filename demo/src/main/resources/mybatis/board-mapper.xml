@@ -22,7 +22,7 @@
    			from board
     		left join member on board.board_writer = member.member_no
     		<!--left join member_profile on member.member_no = member_profile.member_no-->
-    		order by board.board_no desc
+    		order by board.board_wtime desc
 	</select>
 
 	<!-- 카테고리별 게시글 목록 조회 -->
@@ -43,7 +43,7 @@
         left join member on board.board_writer = member.member_no
 		<!--left join member_profile on member.member_no = member_profile.member_no-->
         where board.board_category = #{category}
-        order by board.board_no desc
+        order by board.board_wtime desc
     </select>
    
 
