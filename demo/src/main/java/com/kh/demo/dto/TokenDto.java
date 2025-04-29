@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class TokenDto {
 	private long tokenNo;
-	private String tokenTarget;
+	private long tokenTarget;
 	private String tokenValue;
 	private Timestamp tokenTime;
 }

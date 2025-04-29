@@ -65,22 +65,22 @@ public class MemberRestController {
 	
 	@PostMapping("/refresh")
 	public MemberSigninResponseVO refresh(@RequestHeader("Authorization") String refreshToken) {
-		String memberId = tokenService.parseBearerToken(refreshToken);
+		long memberNo = tokenService.parseBearerToken(refreshToken);
 		
-		if (!tokenService.checkBearerToken(memberId, refreshToken)) 
+		if (!tokenService.checkBearerToken(memberNo, refreshToken)) 
 			throw new RuntimeException();
 		
 		return MemberSigninResponseVO.builder()
-									.memberId(memberId)
-									.accessToken(tokenService.generateAccessToken(memberId))
-									.refreshToken(tokenService.generateRefreshToken(memberId))
+									.memberId(memberDao.findMemberByNo(memberNo).getMemberId())
+									.accessToken(tokenService.generateAccessToken(memberNo))
+									.refreshToken(tokenService.generateRefreshToken(memberNo))
 									.build();
 	}
 	
 	@PostMapping("/signout")
 	 public void logout(@RequestHeader("Authorization") String accessToken) {
-		String memberId = tokenService.parse(accessToken);
-	    tokenDao.clean(memberId);
+		long memberNo = tokenService.parse(accessToken);
+	    tokenDao.clean(memberNo);
 	}
 	
 	@GetMapping("/memberEmail/{memberEmail}")

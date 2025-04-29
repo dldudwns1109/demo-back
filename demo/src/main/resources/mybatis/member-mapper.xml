@@ -23,6 +23,11 @@
 		where member_id = #{memberId}
 	</select>
 	
+	<select id="findMemberByNo" resultType="MemberDto">
+		select * from member
+		where member_no = #{memberNo}
+	</select>
+	
 	<select id="findMemberByEmail" resultType="MemberDto">
 		select * from member
 		where member_email = #{memberEmail}
