@@ -106,4 +106,18 @@ public class TokenService {
 					.build()
 				);
 	}
+	
+	public long getRemainTime(String bearerToken) {
+		String token = bearerToken.substring(7);
+		
+		Claims claims = (Claims) Jwts.parser()
+									.verifyWith(tokenProperties.getKey())
+									.requireIssuer(tokenProperties.getIssuer())
+									.build()
+									.parse(token)
+									.getPayload();
+		
+		return claims.getExpiration().getTime() 
+				- new Date().getTime();
+	}
 }
