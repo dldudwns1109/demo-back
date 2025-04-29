@@ -83,7 +83,8 @@
         update board
         set board_title = #{boardTitle},
             board_content = #{boardContent},
-            board_category = #{boardCategory}
+            board_category = #{boardCategory},
+            board_wtime = systimestamp
         where board_no = #{boardNo}
     </update>
 
