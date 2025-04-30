@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="crewmember">
+
+	<!-- 모임 가입 처리 -->
+    <insert id="join" parameterType="CrewMemberDto">
+        INSERT INTO crew_member (
+            crew_no,
+            member_no,
+            join_date,
+            leader,
+            status
+        ) VALUES (
+            #{crewNo},
+            #{memberNo},
+            systimestamp,
+            #{leader},
+            #{status}
+        )
+    </insert>
+
+    <!-- 모임 탈퇴 처리 -->
+    <delete id="leave" parameterType="CrewMemberDto">
+        DELETE FROM crew_member
+        WHERE crew_no = #{crewNo}
+          AND member_no = #{memberNo}
+    </delete>
+
+    <!-- 모임장 여부 확인 -->
+    <select id="isLeader" parameterType="CrewMemberDto" resultType="boolean">
+        SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
+        FROM crew_member
+        WHERE crew_no = #{crewNo}
+          AND member_no = #{memberNo}
+          AND leader = 1
+    </select>
+
+    <!-- 모임 가입 여부 확인 -->
+    <select id="isMember" parameterType="CrewMemberDto" resultType="boolean">
+        SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
+        FROM crew_member
+        WHERE crew_no = #{crewNo}
+          AND member_no = #{memberNo}
+    </select>
+
+    <!-- 특정 모임의 전체 회원 목록 -->
+    <select id="selectListByCrew" parameterType="long" resultType="CrewMemberVO">
+        SELECT
+            crew_no,
+            member_no,
+            join_date,
+            leader,
+            status
+        FROM crew_member
+        WHERE crew_no = #{crewNo}
+        ORDER BY join_date DESC
+    </select>
+
+    <!-- 모임장에 의한 강퇴 -->
+    <delete id="kick" parameterType="CrewMemberDto">
+        DELETE FROM crew_member
+        WHERE crew_no = #{crewNo}
+          AND member_no = #{memberNo}
+    </delete>
+
+
+</mapper>

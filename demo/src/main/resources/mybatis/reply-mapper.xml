@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="reply">
+
+    <!-- 댓글 작성 -->
+    <insert id="insert">
+        insert into reply (
+            reply_no, reply_writer, reply_origin, reply_content, reply_wtime
+        ) values (
+            reply_seq.nextval, #{replyWriter}, #{replyOrigin}, #{replyContent}, systimestamp
+        )
+    </insert>
+
+    <!-- 댓글 목록 조회 (특정 게시글) -->
+    <select id="selectListByOrigin" resultType="com.kh.demo.dto.ReplyDto">
+        select *
+        from reply
+        where reply_origin = #{replyOrigin}
+        order by reply_wtime desc
+    </select>
+
+    <!-- 댓글 수정 -->
+    <update id="update">
+        update reply
+        set reply_content = #{replyContent},
+            reply_utime = systimestamp
+        where reply_no = #{replyNo}
+    </update>
+
+    <!-- 댓글 삭제 -->
+    <delete id="delete">
+        delete from reply
+        where reply_no = #{replyNo}
+    </delete>
+
+    <!-- 특정 게시글의 댓글 수 조회 -->
+    <select id="countByOrigin" resultType="int">
+        select count(*) from reply
+        where reply_origin = #{replyOrigin}
+    </select>
+
+    <!-- 댓글 작성 시 게시판 댓글 수 +1 증가 -->
+    <update id="updateBoardReplyUp">
+        update board
+        set board_reply = board_reply + 1
+        where board_no = #{replyOrigin}
+    </update>
+
+    <!-- 댓글 삭제 시 게시판 댓글 수 -1 감소 -->
+    <update id="updateBoardReplyDown">
+        update board
+        set board_reply = board_reply - 1
+        where board_no = #{replyOrigin}
+    </update>
+
+</mapper>
