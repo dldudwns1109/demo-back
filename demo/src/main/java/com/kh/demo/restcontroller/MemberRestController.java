@@ -89,7 +89,7 @@ public class MemberRestController {
 	}
 	
 	@PatchMapping("/updatePw")
-	public void findPw(@PathVariable String memberEmail) throws MessagingException, IOException {
+	public void findPw(@RequestBody String memberEmail) throws MessagingException, IOException {
 		memberService.sendTempPassword(memberEmail);
 	}
 	
