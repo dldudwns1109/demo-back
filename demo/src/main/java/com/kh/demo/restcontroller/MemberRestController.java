@@ -1,6 +1,7 @@
 package com.kh.demo.restcontroller;
 
 import java.io.IOException;
+import java.util.Map;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,8 +90,8 @@ public class MemberRestController {
 	}
 	
 	@PatchMapping("/updatePw")
-	public void findPw(@RequestBody String memberEmail) throws MessagingException, IOException {
-		memberService.sendTempPassword(memberEmail);
+	public void findPw(@RequestBody Map<String, String> memberEmail) throws MessagingException, IOException {
+		memberService.sendTempPassword(memberEmail.get("memberEmail"));
 	}
 	
 	@PatchMapping("/{memberId}")
