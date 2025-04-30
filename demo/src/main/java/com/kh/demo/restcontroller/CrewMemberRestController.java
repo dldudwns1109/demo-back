@@ -35,8 +35,7 @@ public class CrewMemberRestController {
 	@PostMapping("/{crewNo}/join")
 	public void join(@PathVariable Long crewNo,
 					@RequestHeader("Authorizaion") String token) {
-		String memberId = tokenService.parse(token);
-		Long memberNo = memberDao.findMember(memberId).getMemberNo();
+		long memberNo = tokenService.parse(token);
 		
 		CrewMemberDto crewMemberDto = CrewMemberDto.builder()
 					.crewNo(crewNo)
@@ -52,8 +51,7 @@ public class CrewMemberRestController {
 	@DeleteMapping("/{crewNo}/leave")
 	public boolean leave(@PathVariable Long crewNo,
 						@RequestHeader("Authorization") String token) {
-		String memberId = tokenService.parse(token);
-		Long memberNo = memberDao.findMember(memberId).getMemberNo();
+		long memberNo = tokenService.parse(token);
 		
 		CrewMemberDto crewMemberDto = CrewMemberDto.builder()
 					.crewNo(crewNo)
@@ -67,8 +65,7 @@ public class CrewMemberRestController {
 	@GetMapping("/{crewNo}/leader")
 	public boolean leader(@PathVariable Long crewNo,
 						@RequestHeader("Authorization") String token) {
-		String memberId = tokenService.parse(token);
-		Long memberNo = memberDao.findMember(memberId).getMemberNo();
+		long memberNo = tokenService.parse(token);
 		
 		CrewMemberDto crewMemberDto = CrewMemberDto.builder()
 					.crewNo(crewNo)
@@ -82,8 +79,7 @@ public class CrewMemberRestController {
 	@GetMapping("/{crewNo}/member")
 	public boolean member(@PathVariable Long crewNo,
 						@RequestHeader("Authorization") String token) {
-		String memberId = tokenService.parse(token);
-		Long memberNo = memberDao.findMember(memberId).getMemberNo();
+		long memberNo = tokenService.parse(token);
 		
 		CrewMemberDto crewMemberDto = CrewMemberDto.builder()
 					.crewNo(crewNo)
@@ -104,8 +100,7 @@ public class CrewMemberRestController {
 	public boolean kick(@PathVariable Long crewNo,
 						@PathVariable Long memberNo,
 						@RequestHeader("Authorization") String token) {
-		String loginMemberId = tokenService.parse(token);
-		Long loginMemberNo = memberDao.findMember(loginMemberId).getMemberNo();
+		long loginMemberNo = tokenService.parse(token);
 		
 		//모임장만 강퇴 가능
 		CrewMemberDto checkDto = CrewMemberDto.builder()
