@@ -1,6 +1,8 @@
 package com.kh.demo.dao;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +48,18 @@ public class BoardDao {
 		return sqlSession.delete("board.delete", boardNo) > 0;
 	}
 	
+	// 특정 크루 번호의 게시글 전체 조회
+    public List<BoardVO> selectListByCrewNo(Long crewNo) {
+        return sqlSession.selectList("board.selectListByCrewNo", crewNo);
+    }
+
+    // 특정 크루 번호 + 카테고리별 게시글 조회
+    public List<BoardVO> selectListByCrewNoAndCategory(Long crewNo, String boardCategory) {
+        Map<String, Object> param = new HashMap<>();
+        param.put("crewNo", crewNo);
+        param.put("category", boardCategory);
+        return sqlSession.selectList("board.selectListByCrewNoAndCategory", param);
+    }
 }
 
 
