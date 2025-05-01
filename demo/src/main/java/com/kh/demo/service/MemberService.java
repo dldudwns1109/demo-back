@@ -2,6 +2,7 @@ package com.kh.demo.service;
 
 import java.io.IOException;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -10,7 +11,9 @@ import org.springframework.stereotype.Service;
 
 import com.kh.demo.dao.MemberDao;
 import com.kh.demo.dto.MemberDto;
+import com.kh.demo.dto.MemberLikeDto;
 import com.kh.demo.util.RandomGenerator;
+import com.kh.demo.vo.MemberVO;
 
 import jakarta.mail.MessagingException;
 
@@ -29,9 +32,20 @@ public class MemberService {
 	@Autowired
 	private RandomGenerator randomGenerator;
 	
-	public void signup(MemberDto memberDto) {
+	public void signup(MemberVO memberVO) {
+		ModelMapper mapper = new ModelMapper();
+		MemberDto memberDto = mapper.map(memberVO, MemberDto.class);
+		memberDto.setMemberNo(memberDao.sequence());
 		memberDto.setMemberPw(passwordEncoder.encode(memberDto.getMemberPw()));
 		memberDao.insert(memberDto);
+		for (String memberLike : memberVO.getMemberLike()) {
+			memberDao.insertLike(
+				MemberLikeDto.builder()
+					.memberNo(memberDto.getMemberNo())
+					.memberLike(memberLike)
+				.build()
+			);			
+		}
 	}
 	
 	public MemberDto signin(MemberDto memberDto) {

@@ -10,11 +10,18 @@
 		insert into member (
 			member_no, member_id, member_pw, member_nickname,
 			member_email, member_location, member_school, 
-			member_gender, member_birth, member_like, member_mbti
+			member_gender, member_birth, member_mbti
 		) values (
 			#{memberNo}, #{memberId}, #{memberPw}, #{memberNickname},
 			#{memberEmail}, #{memberLocation}, #{memberSchool},
-			#{memberGender}, #{memberBirth}, #{memberLike}, #{memberMbti}
+			#{memberGender}, #{memberBirth}, #{memberMbti}
+		)
+	</insert>
+	<insert id="insertLike">
+		insert into member_like (
+			member_no, member_like
+		) values (
+			#{memberNo}, #{memberLike}
 		)
 	</insert>
 	
@@ -61,9 +68,6 @@
 	        </if>
 	        <if test="memberSchool != null">
 	            member_school = #{memberSchool},
-	        </if>
-	        <if test="memberLike != null">
-	            member_like = #{memberLike},
 	        </if>
 	        <if test="memberMbti != null">
 	            member_mbti = #{memberMbti},

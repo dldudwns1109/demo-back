@@ -1,15 +1,11 @@
-package com.kh.demo.dto;
+package com.kh.demo.vo;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+import java.util.List;
+
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class MemberDto {
+public class MemberVO {
 	private long memberNo;
 	private String memberId;
 	private String memberPw;
@@ -20,4 +16,6 @@ public class MemberDto {
 	private char memberGender;
 	private String memberBirth;
 	private String memberMbti;
+	private String memberImg;
+	private List<String> memberLike;
 }

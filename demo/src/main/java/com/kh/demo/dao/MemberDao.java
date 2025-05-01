@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.kh.demo.dto.MemberDto;
+import com.kh.demo.dto.MemberLikeDto;
 
 @Repository
 public class MemberDao {
@@ -18,6 +19,10 @@ public class MemberDao {
 	
 	public void insert(MemberDto memberDto) {
 		sqlSession.insert("member.insert", memberDto);
+	}
+	
+	public void insertLike(MemberLikeDto memberLikeDto) {
+		sqlSession.insert("member.insertLike", memberLikeDto);
 	}
 	
 	public MemberDto findMember(String memberId) {

@@ -24,6 +24,7 @@ import com.kh.demo.service.MemberService;
 import com.kh.demo.service.TokenService;
 import com.kh.demo.vo.MemberSigninRequestVO;
 import com.kh.demo.vo.MemberSigninResponseVO;
+import com.kh.demo.vo.MemberVO;
 
 import jakarta.mail.MessagingException;
 
@@ -45,8 +46,8 @@ public class MemberRestController {
 	private TokenDao tokenDao;
 	
 	@PostMapping("/signup")
-	public void signup(@RequestBody MemberDto memberDto) {
-		memberService.signup(memberDto);
+	public void signup(@RequestBody MemberVO memberVO) {
+		memberService.signup(memberVO);
 	}
 	
 	@PostMapping("/signin")
