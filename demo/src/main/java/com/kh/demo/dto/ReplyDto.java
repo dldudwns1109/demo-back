@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+//댓글 저장에 사용하는 DTO
 @Data @Builder @AllArgsConstructor @NoArgsConstructor
 public class ReplyDto {
 	private Long replyNo; //댓글 번호

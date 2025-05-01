@@ -7,35 +7,29 @@ import org.springframework.stereotype.Service;
 
 import com.kh.demo.dao.ReplyDao;
 import com.kh.demo.dto.ReplyDto;
+import com.kh.demo.dto.ReplyListDto;
 
 @Service
 public class ReplyService {
 
-	@Autowired
-	private ReplyDao replyDao;
-	
-	 // 댓글 작성
-    public void write(ReplyDto replyDto) {
+    @Autowired
+    private ReplyDao replyDao;
+
+    public ReplyListDto writeAndReturn(ReplyDto replyDto) {
         replyDao.insert(replyDto);
+        return replyDao.selectLatestByWriter(replyDto.getReplyWriter(), replyDto.getReplyOrigin());
     }
 
-    // 게시글에 달린 댓글 목록 조회
-    public List<ReplyDto> list(Long replyOrigin) {
-        return replyDao.selectListByOrigin(replyOrigin);
+    public List<ReplyListDto> list(Long replyOrigin) {
+        return replyDao.selectListWithMemberInfo(replyOrigin);
     }
 
-    // 댓글 수정
     public boolean edit(ReplyDto replyDto) {
         return replyDao.update(replyDto);
     }
 
-    // 댓글 삭제
     public boolean delete(Long replyNo, Long replyOrigin) {
         return replyDao.delete(replyNo, replyOrigin);
     }
-
-    // 특정 게시글 댓글 수
-    public int count(Long replyOrigin) {
-        return replyDao.countByOrigin(replyOrigin);
-    }
 }
+
