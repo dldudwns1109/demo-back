@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kh.demo.dto.ReplyDto;
+import com.kh.demo.dto.ReplyListDto;
 import com.kh.demo.service.ReplyService;
 
 @CrossOrigin
@@ -22,18 +23,18 @@ import com.kh.demo.service.ReplyService;
 @RequestMapping("/api/reply")
 public class ReplyRestController {
 
-	@Autowired
-	private ReplyService replyService;
-	
-	// 댓글 작성
+    @Autowired
+    private ReplyService replyService;
+
+    // 댓글 작성 + 작성한 댓글 반환
     @PostMapping
-    public void write(@RequestBody ReplyDto replyDto) {
-        replyService.write(replyDto);
+    public ReplyListDto write(@RequestBody ReplyDto replyDto) {
+        return replyService.writeAndReturn(replyDto);
     }
 
-    // 특정 게시글의 댓글 목록 조회
+    // 댓글 목록 조회
     @GetMapping("/{replyOrigin}")
-    public List<ReplyDto> list(@PathVariable Long replyOrigin) {
+    public List<ReplyListDto> list(@PathVariable Long replyOrigin) {
         return replyService.list(replyOrigin);
     }
 
@@ -50,3 +51,4 @@ public class ReplyRestController {
         return replyService.delete(replyNo, replyOrigin);
     }
 }
+
