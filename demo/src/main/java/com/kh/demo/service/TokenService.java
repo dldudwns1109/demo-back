@@ -36,7 +36,7 @@ public class TokenService {
 		tokenDao.insert(
 			TokenDto.builder()
 				.tokenNo(tokenDao.sequence())
-				.tokenTarget(memberDto.getMemberId())
+				.tokenTarget(memberDto.getMemberNo())
 				.tokenValue(tokenValue)
 			.build()
 		);
@@ -55,11 +55,11 @@ public class TokenService {
 					.expiration(limit)
 					.issuer(tokenProperties.getIssuer())
 					.issuedAt(now)
-					.claim("memberId", memberDto.getMemberId())
+					.claim("memberNo", memberDto.getMemberNo())
 				.compact();
 	}
 	
-	public String parse(String token) {
+	public long parse(String token) {
 		Claims claims = (Claims) Jwts.parser()
 									.verifyWith(tokenProperties.getKey())
 									.requireIssuer(tokenProperties.getIssuer())
@@ -67,20 +67,20 @@ public class TokenService {
 									.parse(token)
 									.getPayload();
 		
-		return (String) claims.get("memberId");
+		return ((Integer) claims.get("memberNo")).longValue();
 	}
 	
-	public String parseBearerToken(String bearerToken) {
+	public long parseBearerToken(String bearerToken) {
 		if (bearerToken == null || !bearerToken.startsWith("Bearer ")) 
 			throw new RuntimeException();
 		
 		return parse(bearerToken.substring(7));
 	}
 	
-	public boolean checkBearerToken(String memberId, String bearerToken) {
+	public boolean checkBearerToken(long memberNo, String bearerToken) {
 		TokenDto tokenDto = tokenDao.find(
 								TokenDto.builder()
-									.tokenTarget(memberId)
+									.tokenTarget(memberNo)
 									.tokenValue(bearerToken.substring(7))
 								.build()
 							);
@@ -91,19 +91,33 @@ public class TokenService {
 		return false;
 	}
 	
-	public String generateAccessToken(String memberId) {
+	public String generateAccessToken(long memberNo) {
 		return generateAccessToken(
 					MemberDto.builder()
-						.memberId(memberId)
+						.memberNo(memberNo)
 					.build()
 				);
 	}
 	
-	public String generateRefreshToken(String memberId) {
+	public String generateRefreshToken(long memberNo) {
 		return generateRefreshToken(
 					MemberDto.builder()
-						.memberId(memberId)
+						.memberNo(memberNo)
 					.build()
 				);
+	}
+	
+	public long getRemainTime(String bearerToken) {
+		String token = bearerToken.substring(7);
+		
+		Claims claims = (Claims) Jwts.parser()
+									.verifyWith(tokenProperties.getKey())
+									.requireIssuer(tokenProperties.getIssuer())
+									.build()
+									.parse(token)
+									.getPayload();
+		
+		return claims.getExpiration().getTime() 
+				- new Date().getTime();
 	}
 }

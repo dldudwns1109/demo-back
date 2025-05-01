@@ -28,7 +28,7 @@ public class TokenDao {
 		return sqlSession.delete("token.delete", tokenDto) > 0;
 	}
 	
-	public boolean clean(String tokenTarget) {
+	public boolean clean(long tokenTarget) {
 		return sqlSession.delete("token.deleteByTokenTarget", tokenTarget) > 0;
 	}
 	

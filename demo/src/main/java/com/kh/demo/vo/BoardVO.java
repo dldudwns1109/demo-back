@@ -19,6 +19,8 @@ public class BoardVO {
     private String boardWriterGender;
     private String boardWriterBirth;
     private String boardWriterMbti;
+    private String boardWriterLocation;
+    private String boardWriterSchool;
 
 	// 작성 시간 포맷팅된 문자열을 반환하는 메서드
 	public String getFormattedWriteTime() {

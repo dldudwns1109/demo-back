@@ -1,5 +1,7 @@
 package com.kh.demo.service;
 
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,8 +33,11 @@ public class BoardService {
 		boardDao.insert(boardDto);
 	}
 
+	//수정 메소드 (작성시간 현재시간으로 반영)
 	public boolean edit(BoardDto boardDto) {
-		return boardDao.update(boardDto);
+		//수정시 작성시간을 현재시간으로 업데이트
+		boardDto.setBoardWriteTime(Timestamp.from(Instant.now()));
+        return boardDao.update(boardDto);
 	}
 
 	public boolean delete(Long boardNo) {

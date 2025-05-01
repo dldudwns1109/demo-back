@@ -24,6 +24,10 @@ public class MemberDao {
 		return sqlSession.selectOne("member.findMember", memberId);
 	}
 	
+	public MemberDto findMemberByNo(long memberNo) {
+		return sqlSession.selectOne("member.findMemberByNo", memberNo);
+	}
+	
 	public MemberDto findMemberByEmail(String memberEmail) {
 		return sqlSession.selectOne("member.findMemberByEmail", memberEmail);
 	}
