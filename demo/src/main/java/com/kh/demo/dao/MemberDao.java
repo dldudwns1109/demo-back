@@ -37,6 +37,10 @@ public class MemberDao {
 		return sqlSession.selectOne("member.findMemberByEmail", memberEmail);
 	}
 	
+	public MemberDto findMemberByNickname(String memberNickname) {
+		return sqlSession.selectOne("member.findMemberByNickname", memberNickname);
+	}
+	
 	public String findId(String memberEmail) {
 		return sqlSession.selectOne("member.findId", memberEmail);
 	}

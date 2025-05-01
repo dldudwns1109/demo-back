@@ -40,6 +40,11 @@
 		where member_email = #{memberEmail}
 	</select>
 	
+	<select id="findMemberByNickname" resultType="MemberDto">
+		select * from member
+		where member_nickname = #{memberNickname}
+	</select>
+	
 	<select id="findId" resultType="String">
 		select member_id from member 
 		where member_email = #{memberEmail}

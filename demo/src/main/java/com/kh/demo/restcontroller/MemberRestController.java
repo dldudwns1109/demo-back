@@ -95,6 +95,24 @@ public class MemberRestController {
 		memberService.sendTempPassword(memberEmail.get("memberEmail"));
 	}
 	
+	@GetMapping("/checkDuplicatedId/{memberId}")
+	public boolean checkDuplicatedId(@PathVariable String memberId) {
+		if (memberDao.findMember(memberId) == null) return false;
+		else return true;
+	}
+	
+	@GetMapping("/checkDuplicatedEmail/{memberEmail}")
+	public boolean checkDuplicatedEmail(@PathVariable String memberEmail) {
+		if (memberDao.findMemberByEmail(memberEmail) == null) return false;
+		else return true;
+	}
+	
+	@GetMapping("/checkDuplicatedNickname/{memberNickname}")
+	public boolean checkDuplicatedNickname(@PathVariable String memberNickname) {
+		if (memberDao.findMemberByNickname(memberNickname) == null) return false;
+		else return true;
+	}
+	
 	@PatchMapping("/{memberId}")
 	public void edit(@PathVariable String memberId, 
 						@RequestBody MemberDto memberDto) {
