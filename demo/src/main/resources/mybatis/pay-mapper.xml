@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="pay">
+	
+	<!-- 등록 -->
+	<select id="paySequence" resultType="long">
+		select pay_seq.nextval from dual
+	</select>
+	<insert id="addPay">
+		insert into pay(
+			pay_no, pay_owner, pay_tid, 
+			pay_name, pay_price
+		)
+		values(
+			#{payNo}, #{payOwner}, #{payTid}, 
+			#{payName}, #{payPrice}
+		)
+	</insert>
+	
+	<select id="payDetailSequence" resultType="long">
+		select pay_detail_seq.nextval from dual
+	</select>
+	<insert id="addPayDetail">
+		insert into pay_detail (
+			pay_detail_no, pay_detail_origin, pay_detail_name, 
+			pay_detail_price, pay_detail_status
+		)
+		values (
+			#{payDetailNo}, #{payDetailOrigin}, #{payDetailName},
+			#{payDetailPrice}, 'Y'
+		)		
+	</insert>
+	
+	<!-- 조회 -->
+	<select id="listPay" resultType="PayDto">
+		select * from pay order by pay_no desc
+	</select>
+	<select id="listPayDetail" resultType="PayDetailDto">
+		select * from pay_detail
+		where pay_detail_origin = #{payDetailOrigin}
+		order by pay_detail_no asc
+	</select>
+	
+	<!-- 
+		mybatis에서 계층형 조회를 처리할 수 있도록 구현
+		- mybatis에서 자동으로 처리해주는건 1 depth 까지이다
+		- 그보다 복잡하거나 구조를 변경하여 조회할 경우는 수동으로 조회
+		- 수동으로 조회하기 위해서는 조회할 구조를 <resultMap>으로 생성
+		
+		- type = 실제 자료형
+		- id = 매퍼에서 부르기 위한 별칭
+		- association은 인스턴스를 의미
+		- collection은 컬렉션(리스트,맵,셋 등)을 의미
+		- property = 필드명
+		- <result>를 이용하여 DB컬럼과 필드를 연결
+		- column = DB컬럼명
+		- property = 클래스필드명
+		- select = 데이터를 채우기 위해서 필요한 구문
+	 -->
+	<resultMap type="PayTotalVO" id="payTotalVO">
+		<association property="payDto" javaType="PayDto">
+			<result column="pay_no" property="payNo"/>
+			<result column="pay_owner" property="payOwner"/>
+			<result column="pay_tid" property="payTid"/>
+			<result column="pay_name" property="payName"/>
+			<result column="pay_price" property="payPrice"/>
+			<result column="pay_time" property="payTime"/>
+		</association>
+		<collection property="payList" javaType="List" ofType="PayDetailDto"
+						select="listPayDetail" column="pay_no">
+			<result column="pay_detail_no" property="payDetailNo"/>
+			<result column="pay_detail_origin" property="payDetailOrigin"/>
+			<result column="pay_detail_name" property="payDetailName"/>
+			<result column="pay_detail_price" property="payDetailPrice"/>
+			<result column="pay_detail_status" property="payDetailStatus"/>
+		</collection>
+	</resultMap>
+	
+	<!-- resultMap을 이용한 조회 -->
+	<select id="listPayAuto" resultMap="payTotalVO">
+		select * from pay 
+		<if test="payOwner != null">
+		where pay_owner = #{payOwner}
+		</if>
+		order by pay_no desc
+	</select>
+	
+	<select id="findPay" resultType="PayDto">
+		select * from pay where pay_no = #{payNo}
+	</select>
+	
+	<!-- 결제상세정보 단일조회 -->
+	<select id="findDetail" resultType="PayDetailDto">
+		select * from pay_detail where pay_detail_no = #{payDetailNo}
+	</select>
+	
+</mapper>

@@ -30,7 +30,16 @@
         FROM crew
         WHERE crew_no = #{crewNo}
     </select>
-
+	
+	<select id="find" resultType="CrewDto">
+		select * from crew 
+		where crew_no = #{crewNo}
+	</select>
+	
+	<select id="sequence" resultType="long">
+		select crew_seq.nextval from dual
+	</select>
+	
     <!-- 모임 등록 -->
     <insert id="insert" parameterType="CrewDto">
         INSERT INTO crew (
