@@ -85,5 +85,10 @@
 	    delete from member
 	    where member_no = #{memberNo}
 	</delete>
+	
+	<select id="findMemberLike" resultType="String">
+		select member_like from member_like
+		where member_no = #{memberNo} 
+	</select>
 
 </mapper>

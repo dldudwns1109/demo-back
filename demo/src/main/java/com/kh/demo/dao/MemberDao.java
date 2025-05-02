@@ -1,5 +1,7 @@
 package com.kh.demo.dao;
 
+import java.util.List;
+
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -55,5 +57,9 @@ public class MemberDao {
 
 	public void deleteMember(long memberNo) {
 	    sqlSession.delete("member.deleteMember", memberNo);
+	}
+	
+	public List<String> findMemberLike(long memberNo) {
+		return sqlSession.selectList("member.findMemberLike", memberNo);
 	}
 }

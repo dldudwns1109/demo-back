@@ -91,6 +91,14 @@
 		useGeneratedKeys="true": DB가 생성한 key 값을 반환받겠다
 		keyProperty="crewNo": 그 값을 CrewDto의 crewNo 필드에 주입하겠다는 뜻
 	-->
+	
+	<select id="selectLikedCrew" resultType="CrewDto">
+		select * from crew
+		where crew_category in 
+		<foreach collection="list" item="memberLike" open="(" separator="," close=")">
+			#{memberLike}
+		</foreach>
+	</select>
 
     <!-- 모임 수정 -->
     <update id="update" parameterType="CrewDto">

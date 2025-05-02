@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.kh.demo.dao.CrewDao;
 import com.kh.demo.dao.CrewMemberDao;
+import com.kh.demo.dao.MemberDao;
 import com.kh.demo.dto.AttachmentDto;
 import com.kh.demo.dto.CrewDto;
 import com.kh.demo.dto.CrewLikeDto;
@@ -42,6 +43,9 @@ public class CrewRestController {
 	
 	@Autowired
 	private CrewMemberDao crewMemberDao;
+	
+	@Autowired
+	private MemberDao memberDao;
 	
 	//전체 모임 목록 조회
 	@GetMapping("/list")
@@ -86,6 +90,35 @@ public class CrewRestController {
 			);
 		}
 		
+		return searchList;
+	}
+	
+	@GetMapping("/findLikedGroup/{userNo}")
+	public List<CrewDetailVO> selectLikedGroup(@PathVariable Long userNo) {
+		List<CrewDetailVO> searchList = new ArrayList<>();
+		
+		for (CrewDto crew : crewDao.selectLikedGroup(memberDao.findMemberLike(userNo))) {
+			searchList.add(
+				CrewDetailVO.builder()
+					.crewNo(crew.getCrewNo())
+					.crewName(crew.getCrewName())
+					.crewCategory(crew.getCrewCategory())
+					.crewLocation(crew.getCrewLocation())
+					.crewLimit(crew.getCrewLimit())
+					.crewIntro(crew.getCrewIntro())
+					.crewIsLiked(userNo == null 
+						? false 
+						: crewDao.selectLike(
+							CrewLikeDto.builder()
+								.crewNo(crew.getCrewNo())
+								.memberNo(userNo)
+							.build()
+					))
+					.crewMemberCnt(crewMemberDao.selectMemberCnt(crew.getCrewNo()))
+//					.crewAttachmentNo(crewDao.findImage(crew.getCrewNo()))
+				.build()
+			);
+		}
 		return searchList;
 	}
 	

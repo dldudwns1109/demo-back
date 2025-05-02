@@ -87,4 +87,8 @@ public class CrewDao {
 			return false;
 		return true;
 	}
+	
+	public List<CrewDto> selectLikedGroup(List<String> memberLike) {
+		return sqlSession.selectList("crew.selectLikedCrew", memberLike);
+	}
 }
