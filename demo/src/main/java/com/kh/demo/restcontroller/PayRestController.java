@@ -8,21 +8,23 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.kh.demo.dto.CrewDto;
 import com.kh.demo.error.TargetNotFoundException;
+import com.kh.demo.service.AttachmentService;
 import com.kh.demo.service.PayService;
 import com.kh.demo.service.TokenService;
-import com.kh.demo.vo.CrewPayRequestVO;
 import com.kh.demo.vo.pay.PayApproveResponseVO;
 import com.kh.demo.vo.pay.PayApproveVO;
 import com.kh.demo.vo.pay.PayReadyResponseVO;
@@ -40,6 +42,8 @@ public class PayRestController {
 	private PayService payService;
 	@Autowired
 	private TokenService tokenService;
+	@Autowired
+	private AttachmentService attachmentService;
 
 	// Flash value를 저장하기 위한 저장소
 	private Map<String, PayApproveVO> flashMap = Collections.synchronizedMap(new HashMap<>());// thread-safe
@@ -52,40 +56,46 @@ public class PayRestController {
 
 	// 결제준비 요청정보를 저장
 	private Map<String, PayReadyVO> readyMap = Collections.synchronizedMap(new HashMap<>());// thread-safe
+	
+	private Map<String, Long> attachmentNoMap = Collections.synchronizedMap(new HashMap<>());
+	
+	@PostMapping(value = "/ready", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public PayReadyResponseVO ready(
+	    @ModelAttribute CrewDto crewDto,
+	    @RequestParam("totalAmount") int totalAmount,
+	    @RequestParam("attach") MultipartFile attach,
+	    @RequestHeader(value = "Authorization", required = false) String bearerToken,
+	    @RequestHeader("Frontend-URL") String frontendUrl
+	) throws URISyntaxException, IOException {
 
-	@PostMapping("/ready")
-	public PayReadyResponseVO ready(@RequestBody CrewPayRequestVO requestVO,
-	                                 @RequestHeader("Authorization") String bearerToken,
-	                                 @RequestHeader("Frontend-URL") String frontendUrl) throws URISyntaxException {
-
-		log.debug("📦 Frontend-URL received = {}", frontendUrl);
-		CrewDto crewDto = requestVO.getCrewDto();
-
-	    PayReadyVO vo = new PayReadyVO();
-	    vo.setPartnerOrderId(UUID.randomUUID().toString());
-
+	    // 1. 주문 정보 준비
+	    String partnerOrderId = UUID.randomUUID().toString();
 	    long memberNo = tokenService.parseBearerToken(bearerToken);
-	    vo.setPartnerUserId(String.valueOf(memberNo));
 
-	    // ✅ itemName 설정 (모임 이름)
-	    if (crewDto.getCrewName() == null || crewDto.getCrewName().trim().isEmpty()) {
-	        throw new IllegalArgumentException("itemName은 필수입니다");
-	    }
-	    vo.setItemName(crewDto.getCrewName());
+	    PayReadyVO vo = PayReadyVO.builder()
+	        .partnerOrderId(partnerOrderId)
+	        .partnerUserId(String.valueOf(memberNo))
+	        .itemName(crewDto.getCrewName())
+	        .totalAmount(totalAmount)
+	        .build();
 
-	    vo.setTotalAmount(requestVO.getTotalAmount());
-
+	    // 2. 카카오페이 결제 준비
 	    PayReadyResponseVO response = payService.ready(vo);
 
-	    // 임시 저장
-	    flashMap.put(vo.getPartnerOrderId(), PayApproveVO.builder()
-	            .partnerOrderId(vo.getPartnerOrderId())
-	            .partnerUserId(vo.getPartnerUserId())
-	            .tid(response.getTid())
-	            .build());
-	    returnUrlMap.put(vo.getPartnerOrderId(), frontendUrl);
-	    crewMap.put(vo.getPartnerOrderId(), crewDto);
-	    readyMap.put(vo.getPartnerOrderId(), vo);
+	    // 3. 이미지 먼저 저장 (attachmentNo 확보)
+	    long attachmentNo = attachmentService.save(attach).getAttachmentNo();
+
+	    // 4. 결제 정보 및 모임 정보 임시 저장 (Flash Map)
+	    flashMap.put(partnerOrderId, PayApproveVO.builder()
+	        .partnerOrderId(partnerOrderId)
+	        .partnerUserId(vo.getPartnerUserId())
+	        .tid(response.getTid())
+	        .build());
+
+	    crewMap.put(partnerOrderId, crewDto);
+	    readyMap.put(partnerOrderId, vo);
+	    returnUrlMap.put(partnerOrderId, frontendUrl);
+	    attachmentNoMap.put(partnerOrderId, attachmentNo);
 
 	    return response;
 	}
@@ -106,19 +116,17 @@ public class PayRestController {
 		PayApproveResponseVO approveResponse = payService.approve(vo);
 		log.debug("approve = {}", approveResponse);
 		
-		// 3. 임시 저장된 정보 꺼냄
-		PayReadyVO readyVO = readyMap.remove(partnerOrderId);
-		CrewDto crewDto = crewMap.remove(partnerOrderId);
-		
-		// 4. DB 등록 (pay + pay_detail + crew)
-		payService.insertDB(vo, readyVO, crewDto);
-		
-		// 5. 성공 페이지로 리다이렉트
-		String returnUrl = returnUrlMap.remove(partnerOrderId);
-		if (returnUrl == null || returnUrl.isBlank()) {
-		    returnUrl = "http://localhost:5173";
-		}
-		response.sendRedirect("http://localhost:5173/Crew/create-finish");
+		// 3. 임시 저장된 정보 가져오기
+	    PayReadyVO readyVO = readyMap.remove(partnerOrderId);
+	    CrewDto crewDto = crewMap.remove(partnerOrderId);
+	    Long attachmentNo = attachmentNoMap.remove(partnerOrderId);
+	    String returnUrl = returnUrlMap.remove(partnerOrderId);
+
+	    // 4. 결제 및 모임 + 모임장 DB 등록
+	    payService.insertDB(vo, readyVO, crewDto, attachmentNo);
+
+	    // 5. 리다이렉트
+	    response.sendRedirect("http://localhost:5173/crew/create-finish");
 	}
 //	
 //	@GetMapping("/buy/cancel/{partnerOrderId}")

@@ -15,8 +15,8 @@
 			attachment_type, attachment_size
 		)
 		values(
-			#{attachmentNo}, #{attachmenName},
-			#{attachmentType}, #{attachmenSize}
+			#{attachmentNo}, #{attachmentName},
+			#{attachmentType}, #{attachmentSize}
 		)
 	</insert>
 	

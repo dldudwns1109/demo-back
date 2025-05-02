@@ -16,6 +16,9 @@ public class CrewMemberDao {
 	private SqlSession sqlSession;
 	
 	// 모임 가입 처리
+	public long sequence() {
+	    return sqlSession.selectOne("crewmember.sequence");
+	}
     public void join(CrewMemberDto crewMemberDto) {
         sqlSession.insert("crewmember.join", crewMemberDto);
     }

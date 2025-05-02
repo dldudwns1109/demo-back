@@ -11,4 +11,5 @@ import lombok.NoArgsConstructor;
 public class CrewPayRequestVO {
     private CrewDto crewDto;        // 모임 정보
     private int totalAmount;     // 결제 금액
+    private Long attachmentNo;
 }

@@ -2,6 +2,7 @@ package com.kh.demo.service;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,12 +10,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import com.kh.demo.configuration.KakaoPayProperties;
+import com.kh.demo.dao.AttachmentDao;
 import com.kh.demo.dao.CrewDao;
+import com.kh.demo.dao.CrewMemberDao;
 import com.kh.demo.dao.PayDao;
+import com.kh.demo.dto.AttachmentDto;
 import com.kh.demo.dto.CrewDto;
+import com.kh.demo.dto.CrewMemberDto;
 import com.kh.demo.dto.PayDetailDto;
 import com.kh.demo.dto.PayDto;
 import com.kh.demo.vo.pay.PayApproveResponseVO;
@@ -22,6 +28,9 @@ import com.kh.demo.vo.pay.PayApproveVO;
 import com.kh.demo.vo.pay.PayReadyResponseVO;
 import com.kh.demo.vo.pay.PayReadyVO;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class PayService {
 	@Autowired
@@ -34,6 +43,10 @@ public class PayService {
 	private PayDao payDao;
 	@Autowired
 	private CrewDao crewDao;
+	@Autowired
+	private AttachmentDao attachmentDao;
+	@Autowired
+	private CrewMemberDao crewMemberDao;
 	
 	//결제 준비(ready)
 	public PayReadyResponseVO ready(PayReadyVO vo) throws URISyntaxException {
@@ -122,29 +135,66 @@ public class PayService {
 //							uri, entity, PayCancelResponseVO.class);
 //	}
 	
-//	//결제DB에 등록
-	public void insertDB(PayApproveVO approveVO, PayReadyVO readyVO, CrewDto crewDto) {
-		// 1. 결제 대표정보 등록
-		PayDto payDto = PayDto.builder()
-				.payOwner(approveVO.getPartnerUserId()) // memberNo (String)
-			    .payTid(approveVO.getTid())             // 거래번호
-			    .payName(readyVO.getItemName())         // 상품명(모임 이름)
-			    .payPrice(readyVO.getTotalAmount())     // 총 결제 금액
-		    .build();
-	
-		long payNo = payDao.addPay(payDto); // 시퀀스 생성 + insert
-	
-		// 2. 결제 상세정보 등록 (단일 모임)
-	    PayDetailDto payDetailDto = PayDetailDto.builder()
-		        .payDetailOrigin(payNo)
-		        .payDetailName(crewDto.getCrewName())
-		        .payDetailPrice(readyVO.getTotalAmount())
-		        .payDetailStatus('Y')
-	        .build();
-	
-	    payDao.addPayDetail(payDetailDto); // 시퀀스 생성 + insert
-	
-	    // 3. 모임(Crew) 등록
-	    crewDao.insert(crewDto); // 이 부분도 insert 성공되게만 만들면 완벽!
-	}
+	@Transactional
+    public void insertDB(PayApproveVO approveVO, PayReadyVO readyVO, CrewDto crewDto, long attachmentNo) {
+        log.debug("📌 [insertDB] 결제 DB 등록 시작");
+
+     // 1. 결제 대표 정보 등록
+        PayDto payDto = PayDto.builder()
+            .payOwner(Long.parseLong(approveVO.getPartnerUserId()))
+            .payTid(approveVO.getTid())
+            .payName(readyVO.getItemName())
+            .payPrice(readyVO.getTotalAmount())
+            .build();
+        log.debug("✅ [1] 결제 정보 준비 완료 = {}", payDto);
+
+        long payNo = payDao.addPay(payDto);
+        log.debug("✅ [1] 결제 정보 저장 완료 payNo = {}", payNo);
+
+        // 2. 결제 상세 정보 등록
+        PayDetailDto payDetailDto = PayDetailDto.builder()
+            .payDetailOrigin(payNo)
+            .payDetailName(crewDto.getCrewName())
+            .payDetailPrice(readyVO.getTotalAmount())
+            .payDetailStatus('Y')
+            .build();
+        log.debug("✅ [2] 결제 상세 정보 준비 완료 = {}", payDetailDto);
+
+        payDao.addPayDetail(payDetailDto);
+        log.debug("✅ [2] 결제 상세 정보 저장 완료");
+
+        // 3. crew_no 시퀀스 수동 조회
+        long crewNo = crewDao.sequence();
+        crewDto.setCrewNo(crewNo);
+        log.debug("🔁 [3] crew 시퀀스 수동 조회 및 설정 crewNo = {}", crewNo);
+
+        // 4. 모임 등록
+        log.debug("🔁 [4] 모임 등록 시작 crewDto = {}", crewDto);
+        crewDao.insert(crewDto);
+        log.debug("✅ [4] 모임 등록 완료");
+
+        // 5. 이미지 연결
+        log.debug("🔁 [5] 이미지 연결 시작 attachmentNo = {}", attachmentNo);
+        AttachmentDto saved = attachmentDao.selectOne(attachmentNo);
+        log.debug("✅ [5] attachment 조회 완료 = {}", saved);
+
+        crewDao.connect(crewNo, saved.getAttachmentNo());
+        log.debug("✅ [5] crew_image 연결 완료");
+
+        // 6. 모임장 등록
+        long crewMemberNo = crewMemberDao.sequence();
+        CrewMemberDto leaderDto = CrewMemberDto.builder()
+        	.crewMemberNo(crewMemberNo)
+            .crewNo(crewNo)
+            .memberNo(Long.parseLong(approveVO.getPartnerUserId()))
+            .joinDate(LocalDate.now().toString())
+            .leader("Y")
+            .build();
+        log.debug("🔁 [6] 모임장 등록 시작 leaderDto = {}", leaderDto);
+
+        crewMemberDao.join(leaderDto);
+        log.debug("✅ [6] 모임장 등록 완료");
+
+        log.debug("🎉 [insertDB] 전체 트랜잭션 성공 완료");
+    }
 }

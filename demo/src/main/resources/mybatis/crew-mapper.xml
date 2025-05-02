@@ -71,22 +71,26 @@
 	
     <!-- 모임 등록 -->
     <insert id="insert" parameterType="CrewDto">
-        INSERT INTO crew (
-            crew_no,
-            crew_name,
-            crew_category,
-            crew_location,
-            crew_limit,
-            crew_intro
-        ) VALUES (
-            crew_seq.NEXTVAL,
-            #{crewName},
-            #{crewCategory},
-            #{crewLocation},
-            #{crewLimit},
-            #{crewIntro}
-        )
-    </insert>
+	    insert into crew (
+	        crew_no,
+	        crew_name,
+	        crew_category,
+	        crew_location,
+	        crew_limit,
+	        crew_intro
+	    ) VALUES (
+	        #{crewNo},
+	        #{crewName},
+	        #{crewCategory},
+	        #{crewLocation},
+	        #{crewLimit},
+	        #{crewIntro}
+	    )
+	</insert>
+	<!--
+		useGeneratedKeys="true": DB가 생성한 key 값을 반환받겠다
+		keyProperty="crewNo": 그 값을 CrewDto의 crewNo 필드에 주입하겠다는 뜻
+	-->
 
     <!-- 모임 수정 -->
     <update id="update" parameterType="CrewDto">
@@ -104,10 +108,15 @@
         DELETE FROM crew
         WHERE crew_no = #{crewNo}
     </delete>
-    
+
     <select id="findImage" resultType="long">
     	select attachment_no from crew_image
     	where crew_no = #{crewNo}
     </select>
+    <!-- 이미지 -->
+    <insert id="connect">
+	    insert into crew_image (crew_no, attachment_no)
+	    values (#{crewNo}, #{attachmentNo})
+	</insert>
 
 </mapper>

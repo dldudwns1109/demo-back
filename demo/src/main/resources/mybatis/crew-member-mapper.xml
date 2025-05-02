@@ -11,21 +11,27 @@
 	</select>
 
 	<!-- 모임 가입 처리 -->
+	<select id="sequence" resultType="long">
+		select crew_member_seq.nextval from dual
+	</select>
     <insert id="join" parameterType="CrewMemberDto">
-        INSERT INTO crew_member (
-            crew_no,
-            member_no,
-            join_date,
-            leader,
-            status
-        ) VALUES (
-            #{crewNo},
-            #{memberNo},
-            systimestamp,
-            #{leader},
-            #{status}
-        )
-    </insert>
+	    insert into crew_member (
+			crew_member_no,
+	        crew_no,
+	        member_no,
+	        join_date,
+	        leader
+	    ) values (
+			#{crewMemberNo},
+	        #{crewNo},
+	        #{memberNo},
+	        #{joinDate},
+	        <choose>
+	            <when test="leader"> 'Y' </when>
+	            <otherwise> 'N' </otherwise>
+	        </choose>
+	    )
+	</insert>
 
     <!-- 모임 탈퇴 처리 -->
     <delete id="leave" parameterType="CrewMemberDto">
@@ -57,8 +63,7 @@
             crew_no,
             member_no,
             join_date,
-            leader,
-            status
+            leader
         FROM crew_member
         WHERE crew_no = #{crewNo}
         ORDER BY join_date DESC
