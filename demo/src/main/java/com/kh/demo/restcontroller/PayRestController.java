@@ -67,7 +67,6 @@ public class PayRestController {
 	    long memberNo = tokenService.parseBearerToken(bearerToken);
 	    vo.setPartnerUserId(String.valueOf(memberNo));
 
-	    // ✅ itemName 설정 (모임 이름)
 	    if (crewDto.getCrewName() == null || crewDto.getCrewName().trim().isEmpty()) {
 	        throw new IllegalArgumentException("itemName은 필수입니다");
 	    }
@@ -118,7 +117,7 @@ public class PayRestController {
 		if (returnUrl == null || returnUrl.isBlank()) {
 		    returnUrl = "http://localhost:5173";
 		}
-		response.sendRedirect("http://localhost:5173/Crew/create-finish");
+		response.sendRedirect("http://localhost:5173/crew/create-finish");
 	}
 //	
 //	@GetMapping("/buy/cancel/{partnerOrderId}")
