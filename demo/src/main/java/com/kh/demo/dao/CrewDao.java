@@ -24,16 +24,17 @@ public class CrewDao {
 	}
 
 	// 특정 모임 상세 조회
-	public CrewVO selectOne(Long crewNo) {
+	public CrewDto selectOne(Long crewNo) {
 		return sqlSession.selectOne("crew.selectOne", crewNo);
 	}
 
 	// 모임 등록
+	public long sequence() {
+	    return sqlSession.selectOne("crew.sequence");
+	}
 	public CrewDto insert(CrewDto crewDto) {
-		long sequence = sqlSession.selectOne("crew.sequence");
-		crewDto.setCrewNo(sequence);
-		sqlSession.insert("crew.insert", crewDto);
-		return sqlSession.selectOne("crew.find", sequence);
+	    sqlSession.insert("crew.insert", crewDto);
+	    return crewDto;
 	}
 
 	// 모임 수정
@@ -52,6 +53,13 @@ public class CrewDao {
 		params.put("crewNo", crewDto.getCrewNo());
 		params.put("attachmentNo", attachmentDto.getAttachmentNo());
 		sqlSession.insert("crew.connect", params);
+	}
+	
+	public void connect(Long crewNo, Long attachmentNo) {
+	    Map<String, Object> params = new HashMap<>();
+	    params.put("crewNo", crewNo);
+	    params.put("attachmentNo", attachmentNo);
+	    sqlSession.insert("crew.connect", params);
 	}
 	
 	// 이미지 찾기

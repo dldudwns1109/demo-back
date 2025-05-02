@@ -1,5 +1,6 @@
 package com.kh.demo.restcontroller;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,14 +38,17 @@ public class CrewMemberRestController {
 					@RequestHeader("Authorizaion") String token) {
 		long memberNo = tokenService.parse(token);
 		
-		CrewMemberDto crewMemberDto = CrewMemberDto.builder()
-					.crewNo(crewNo)
-					.memberNo(memberNo)
-					.status("가입")
-					.leader(false)
-				.build();
-		
-		crewMemberDao.join(crewMemberDto);
+		long crewMemberNo = crewMemberDao.sequence(); // ★ 이거 꼭 필요함
+
+	    CrewMemberDto crewMemberDto = CrewMemberDto.builder()
+	            .crewMemberNo(crewMemberNo) // ★ 여기 추가!
+	            .crewNo(crewNo)
+	            .memberNo(memberNo)
+	            .leader("N")
+	            .joinDate(LocalDate.now().toString()) // joinDate도 직접 넣기로 했으므로
+	            .build();
+
+	    crewMemberDao.join(crewMemberDto);
 	}
 	
 	//모임 탈퇴 처리
