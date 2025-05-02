@@ -37,7 +37,7 @@ public class AttachmentService {
 		attachmentDto.setAttachmentSize(attach.getSize());
 		AttachmentDto resultDto = attachmentDao.insert(attachmentDto);
 		//물리 파일 저장
-		File target = new File(dir, String.valueOf(resultDto.getAttachmentNo()));//파일명으로 설정
+		File target = new File(dir, String.valueOf(resultDto.getAttachmentName()));//파일명으로 설정
 		attach.transferTo(target);//저장
 		//파일 번호 반환
 		return resultDto;

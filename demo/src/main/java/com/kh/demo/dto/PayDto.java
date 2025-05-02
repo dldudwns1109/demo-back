@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Data @Builder @NoArgsConstructor @AllArgsConstructor
 public class PayDto {
 	private long payNo;//결제번호
-	private String payOwner;//결제자
+	private long payOwner;//결제자
 	private String payTid;//거래번호
 	private String payName;//상품이름
 	private long payPrice;//결제 금액

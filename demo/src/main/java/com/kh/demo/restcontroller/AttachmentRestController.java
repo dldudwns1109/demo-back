@@ -9,8 +9,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.kh.demo.dao.AttachmentDao;
 import com.kh.demo.dto.AttachmentDto;
@@ -49,5 +52,12 @@ public class AttachmentRestController {
 					.build().toString()
 				)
 			.body(resource);
+	}
+	
+	@PostMapping("/temp")
+	public long uploadTemp(@RequestParam MultipartFile attach) 
+			throws IOException, IllegalStateException, java.io.IOException {
+	    AttachmentDto dto = attachmentService.save(attach); // 저장하고
+	    return dto.getAttachmentNo(); // 번호만 반환
 	}
 }

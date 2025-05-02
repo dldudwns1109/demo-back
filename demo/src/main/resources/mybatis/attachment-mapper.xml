@@ -15,13 +15,13 @@
 			attachment_type, attachment_size
 		)
 		values(
-			#{attachmentNo}, #{attachmenName},
-			#{attachmentType}, #{attachmenSize}
+			#{attachmentNo}, #{attachmentName},
+			#{attachmentType}, #{attachmentSize}
 		)
 	</insert>
 	
 	<!-- 상세 조회 -->
-	<select id="findImg">
+	<select id="findImg" resultType="AttachmentDto">
 		select * from attachment where attachment_no = #{attachmentNo}
 	</select>
 	
