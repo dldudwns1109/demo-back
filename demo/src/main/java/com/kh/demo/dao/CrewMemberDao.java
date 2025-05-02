@@ -19,6 +19,10 @@ public class CrewMemberDao {
     public void join(CrewMemberDto crewMemberDto) {
         sqlSession.insert("crewmember.join", crewMemberDto);
     }
+    
+    public long selectMemberCnt(long crewNo) {
+    	return sqlSession.selectOne("crewmember.selectMemberCnt", crewNo);
+    }
 
     // 모임 탈퇴 처리
     public boolean leave(CrewMemberDto crewMemberDto) {

@@ -59,7 +59,7 @@ public class MemberRestController {
 		if (findDto == null) throw new RuntimeException();
 		
 		return MemberSigninResponseVO.builder()
-					.memberId(findDto.getMemberId())
+					.memberNo(findDto.getMemberNo())
 					.accessToken(tokenService.generateAccessToken(findDto))
 					.refreshToken(tokenService.generateRefreshToken(findDto))
 				.build();
@@ -73,7 +73,7 @@ public class MemberRestController {
 			throw new RuntimeException();
 		
 		return MemberSigninResponseVO.builder()
-									.memberId(memberDao.findMemberByNo(memberNo).getMemberId())
+									.memberNo(memberNo)
 									.accessToken(tokenService.generateAccessToken(memberNo))
 									.refreshToken(tokenService.generateRefreshToken(memberNo))
 									.build();

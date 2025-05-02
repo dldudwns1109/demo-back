@@ -66,7 +66,7 @@ public class AttachmentService {
 		
 		//[2] 실제 파일이 존재하는지 확인
 		File dir = fileuploadProperties.getRootDir();
-		File target = new File(dir, String.valueOf(attachmentNo));
+		File target = new File(dir, String.valueOf(attachmentDto.getAttachmentName()));
 		if(target.isFile() == false) {
 			throw new TargetNotFoundException("파일이 존재하지 않습니다");
 		}

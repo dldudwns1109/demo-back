@@ -17,6 +17,35 @@
         FROM crew
         ORDER BY crew_no DESC
     </select>
+    
+    <select id="selectLike" resultType="CrewLikeDto">
+    	select * from crew_like
+    	where member_id = #{memberNo}
+    	and crew_no = #{crewNo}
+    </select>
+    
+    <insert id="updateLike">
+    	insert into crew_like (
+    		member_id, crew_no
+    	) values (
+    		#{memberNo}, #{crewNo}
+    	)
+    </insert>
+    
+    <delete id="deleteLike">
+    	delete crew_like
+    	where member_id = #{memberNo}
+    	and crew_no = #{crewNo}
+    </delete>
+    
+    <select id="selectSearch" resultType="CrewDto">
+    	select * from crew 
+    	where crew_category = #{category}
+    	and crew_location = #{location}
+    	<if test='keyword != "" and keyword != null'>
+    		and instr(category_name, #{keyword}) > 0
+    	</if>
+    </select>
 
     <!-- 특정 모임 상세 조회 -->
     <select id="selectOne" resultType="CrewVO" parameterType="long">
@@ -75,5 +104,10 @@
         DELETE FROM crew
         WHERE crew_no = #{crewNo}
     </delete>
+    
+    <select id="findImage" resultType="long">
+    	select attachment_no from crew_image
+    	where crew_no = #{crewNo}
+    </select>
 
 </mapper>

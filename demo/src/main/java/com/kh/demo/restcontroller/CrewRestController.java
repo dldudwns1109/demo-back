@@ -1,6 +1,7 @@
 package com.kh.demo.restcontroller;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,10 +20,14 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.kh.demo.dao.CrewDao;
+import com.kh.demo.dao.CrewMemberDao;
 import com.kh.demo.dto.AttachmentDto;
 import com.kh.demo.dto.CrewDto;
+import com.kh.demo.dto.CrewLikeDto;
 import com.kh.demo.service.AttachmentService;
+import com.kh.demo.vo.CrewDetailVO;
 import com.kh.demo.vo.CrewVO;
+import com.kh.demo.vo.SearchVO;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -34,6 +39,10 @@ public class CrewRestController {
 
 	@Autowired
 	private CrewDao crewDao;
+	
+	@Autowired
+	private CrewMemberDao crewMemberDao;
+	
 	@Autowired
 	private AttachmentService attachmentService;
 	
@@ -41,6 +50,46 @@ public class CrewRestController {
 	@GetMapping("/list")
 	public List<CrewVO> list() {
 		return crewDao.selectList();
+	}
+	
+	@PostMapping("/updateLike")
+	public void updateLike(@RequestBody CrewLikeDto crewLikeDto) {
+		crewDao.updateLike(crewLikeDto);
+	}
+	
+	@DeleteMapping("/deleteLike")
+	public void deleteLike(@RequestBody CrewLikeDto crewLikeDto) {
+		crewDao.deleteLike(crewLikeDto);
+	}
+	
+	@PostMapping("/search")
+	public List<CrewDetailVO> search(@RequestBody SearchVO searchVO) {
+		List<CrewDetailVO> searchList = new ArrayList<>();
+		
+		for (CrewDto crew : crewDao.selectSearch(searchVO)) {
+			searchList.add(
+				CrewDetailVO.builder()
+					.crewNo(crew.getCrewNo())
+					.crewName(crew.getCrewName())
+					.crewCategory(crew.getCrewCategory())
+					.crewLocation(crew.getCrewLocation())
+					.crewLimit(crew.getCrewLimit())
+					.crewIntro(crew.getCrewIntro())
+					.crewIsLiked(searchVO.getMemberNo() == null 
+						? false 
+						: crewDao.selectLike(
+							CrewLikeDto.builder()
+								.crewNo(crew.getCrewNo())
+								.memberNo(searchVO.getMemberNo())
+							.build()
+					))
+					.crewMemberCnt(crewMemberDao.selectMemberCnt(crew.getCrewNo()))
+					.crewAttachmentNo(crewDao.findImage(crew.getCrewNo()))
+				.build()
+			);
+		}
+		
+		return searchList;
 	}
 	
 	//모임 상세 조회
@@ -97,7 +146,7 @@ public class CrewRestController {
                           HttpServletRequest request,
                           HttpServletResponse response) throws IOException {
         try {
-            int attachmentNo = crewDao.findImage(crewNo);
+            long attachmentNo = crewDao.findImage(crewNo);
             String contextPath = request.getContextPath();
             response.sendRedirect(contextPath + "/api/attachment/" + attachmentNo);
         } catch (Exception e) {

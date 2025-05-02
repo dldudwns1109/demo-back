@@ -5,6 +5,11 @@
 
 <mapper namespace="crewmember">
 
+	<select id="selectMemberCnt" resultType="long">
+		select count(*) from crew_member
+		where crew_no = #{crewNo}
+	</select>
+
 	<!-- 모임 가입 처리 -->
     <insert id="join" parameterType="CrewMemberDto">
         INSERT INTO crew_member (

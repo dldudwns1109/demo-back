@@ -1,4 +1,4 @@
-package com.kh.demo.vo;
+package com.kh.demo.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,8 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MemberSigninResponseVO {
+public class CrewLikeDto {
 	private long memberNo;
-	private String accessToken;
-	private String refreshToken;
+	private long crewNo;
 }

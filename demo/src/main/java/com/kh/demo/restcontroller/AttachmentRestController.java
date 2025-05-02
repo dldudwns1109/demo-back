@@ -28,7 +28,7 @@ public class AttachmentRestController {
 	@Autowired
 	private AttachmentService attachmentService;
 
-	@GetMapping("/{attachmenNo}")
+	@GetMapping("/{attachmentNo}")
 	public ResponseEntity<ByteArrayResource> download(
 							@PathVariable long attachmentNo) throws IOException, java.io.IOException {
 		byte[] data = attachmentService.load(attachmentNo);

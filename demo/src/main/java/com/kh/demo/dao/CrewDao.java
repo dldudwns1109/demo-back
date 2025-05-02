@@ -10,7 +10,9 @@ import org.springframework.stereotype.Repository;
 
 import com.kh.demo.dto.AttachmentDto;
 import com.kh.demo.dto.CrewDto;
+import com.kh.demo.dto.CrewLikeDto;
 import com.kh.demo.vo.CrewVO;
+import com.kh.demo.vo.SearchVO;
 
 @Repository
 public class CrewDao {
@@ -21,6 +23,10 @@ public class CrewDao {
 	// 전체 모임 목록 조회
 	public List<CrewVO> selectList() {
 		return sqlSession.selectList("crew.selectList");
+	}
+	
+	public List<CrewDto> selectSearch(SearchVO searchVO) {
+		return sqlSession.selectList("crew.selectSearch", searchVO);
 	}
 
 	// 특정 모임 상세 조회
@@ -55,7 +61,22 @@ public class CrewDao {
 	}
 	
 	// 이미지 찾기
-	public int findImage(long crewNo) {
+	public long findImage(long crewNo) {
 		return sqlSession.selectOne("crew.findImage", crewNo);
+	}
+	
+	public void updateLike(CrewLikeDto crewLikeDto) {
+		sqlSession.insert("crew.updateLike", crewLikeDto);
+	}
+	
+	public boolean deleteLike(CrewLikeDto crewLikeDto) {
+		return sqlSession.delete("crew.deleteLike", crewLikeDto) > 0;
+	}
+	
+	public boolean selectLike(CrewLikeDto crewLikeDto) {
+		if (sqlSession.selectOne("crew.selectLike", 
+				crewLikeDto) == null)
+			return false;
+		return true;
 	}
 }
