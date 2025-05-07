@@ -63,6 +63,103 @@ public class CrewRestController {
 		crewDao.deleteLike(crewLikeDto);
 	}
 	
+	@GetMapping("/findCreatedGroup/{memberNo}")
+	public List<CrewDetailVO> findCreatedGroup(@PathVariable Long memberNo) {
+		List<CrewDetailVO> createdList = new ArrayList<>();
+		
+		for (long crewNo : crewMemberDao.findCreated(memberNo)) {
+			for (CrewDto crew : crewDao.selectGroupByNo(crewNo)) {
+				createdList.add(
+					CrewDetailVO.builder()
+						.crewNo(crew.getCrewNo())
+						.crewName(crew.getCrewName())
+						.crewCategory(crew.getCrewCategory())
+						.crewLocation(crew.getCrewLocation())
+						.crewLimit(crew.getCrewLimit())
+						.crewIntro(crew.getCrewIntro())
+						.crewIsLiked(memberNo == null 
+							? false 
+							: crewDao.selectLike(
+								CrewLikeDto.builder()
+									.crewNo(crew.getCrewNo())
+									.memberNo(memberNo)
+								.build()
+						))
+						.crewMemberCnt(crewMemberDao.selectMemberCnt(crew.getCrewNo()))
+						.crewAttachmentNo(crewDao.findImage(crew.getCrewNo()))
+					.build()
+				);
+			}
+		}
+		
+		return createdList;
+	}
+	
+	@GetMapping("/findJoinedGroup/{memberNo}")
+	public List<CrewDetailVO> findJoinedGroup(@PathVariable Long memberNo) {
+		List<CrewDetailVO> joinedList = new ArrayList<>();
+		
+		for (long crewNo : crewMemberDao.findJoined(memberNo)) {
+			for (CrewDto crew : crewDao.selectGroupByNo(crewNo)) {
+				joinedList.add(
+					CrewDetailVO.builder()
+						.crewNo(crew.getCrewNo())
+						.crewName(crew.getCrewName())
+						.crewCategory(crew.getCrewCategory())
+						.crewLocation(crew.getCrewLocation())
+						.crewLimit(crew.getCrewLimit())
+						.crewIntro(crew.getCrewIntro())
+						.crewIsLiked(memberNo == null 
+							? false 
+							: crewDao.selectLike(
+								CrewLikeDto.builder()
+									.crewNo(crew.getCrewNo())
+									.memberNo(memberNo)
+								.build()
+						))
+						.crewMemberCnt(crewMemberDao.selectMemberCnt(crew.getCrewNo()))
+						.crewAttachmentNo(crewDao.findImage(crew.getCrewNo()))
+					.build()
+				);
+			}
+		}
+		
+		return joinedList;
+	}
+	
+	@GetMapping("/findLikeGroup/{memberNo}")
+	public List<CrewDetailVO> findLikeGroup(@PathVariable Long memberNo) {
+		List<CrewDetailVO> likedList = new ArrayList<>();
+		
+		for (long crewNo : crewMemberDao.findLiked(memberNo)) {
+			for (CrewDto crew : crewDao.selectGroupByNo(crewNo)) {
+				likedList.add(
+					CrewDetailVO.builder()
+						.crewNo(crew.getCrewNo())
+						.crewName(crew.getCrewName())
+						.crewCategory(crew.getCrewCategory())
+						.crewLocation(crew.getCrewLocation())
+						.crewLimit(crew.getCrewLimit())
+						.crewIntro(crew.getCrewIntro())
+						.crewIsLiked(memberNo == null 
+							? false 
+							: crewDao.selectLike(
+								CrewLikeDto.builder()
+									.crewNo(crew.getCrewNo())
+									.memberNo(memberNo)
+								.build()
+						))
+						.crewMemberCnt(crewMemberDao.selectMemberCnt(crew.getCrewNo()))
+						.crewAttachmentNo(crewDao.findImage(crew.getCrewNo())
+						)
+					.build()
+				);
+			}
+		}
+		
+		return likedList;
+	}
+	
 	@PostMapping("/search")
 	public List<CrewDetailVO> search(@RequestBody SearchVO searchVO) {
 		List<CrewDetailVO> searchList = new ArrayList<>();
@@ -85,7 +182,7 @@ public class CrewRestController {
 							.build()
 					))
 					.crewMemberCnt(crewMemberDao.selectMemberCnt(crew.getCrewNo()))
-					.crewAttachmentNo(crewDao.findImage(crew.getCrewNo()))
+//					.crewAttachmentNo(crewDao.findImage(crew.getCrewNo()))
 				.build()
 			);
 		}

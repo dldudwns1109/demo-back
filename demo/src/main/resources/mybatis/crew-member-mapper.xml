@@ -76,5 +76,23 @@
           AND member_no = #{memberNo}
     </delete>
 
+	<select id="findCreated" resultType="long">
+		select crew_no from crew_member
+		where member_no = #{memberNo}
+		and leader = 'Y'
+		order by join_date desc
+	</select>
+	
+	<select id="findJoined" resultType="long">
+		select crew_no from crew_member
+		where member_no = #{memberNo}
+		and leader = 'N'
+		order by join_date desc
+	</select>
+	
+	<select id="findLiked" resultType="long">
+		select crew_no from crew_like
+		where member_id = #{memberNo}
+	</select>
 
 </mapper>

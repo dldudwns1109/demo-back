@@ -72,4 +72,8 @@ public class MemberDao {
 	public List<String> findMemberLike(long memberNo) {
 		return sqlSession.selectList("member.findMemberLike", memberNo);
 	}
+	
+	public long findImage(long memberNo) {
+		return sqlSession.selectOne("member.findImage", memberNo);
+	}
 }

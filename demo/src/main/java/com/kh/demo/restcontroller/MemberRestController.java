@@ -31,6 +31,8 @@ import com.kh.demo.vo.MemberSigninResponseVO;
 import com.kh.demo.vo.MemberVO;
 
 import jakarta.mail.MessagingException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @CrossOrigin
 @RestController
@@ -146,12 +148,29 @@ public class MemberRestController {
 	    memberDao.deleteMember(findDto.getMemberNo());
 	}
 	
-	@GetMapping("/mypage/{memberId}")
-    public MemberDto MyPage(@PathVariable String memberId) {
-        MemberDto memberDto = memberDao.findMember(memberId);
-        if (memberDto == null) 
-            throw new TargetNotFoundException();
-        return memberDto;
+	@GetMapping("/mypage/{memberNo}")
+    public MemberVO MyPage(@PathVariable long memberNo) {
+        MemberDto memberDto = memberDao.findMemberByNo(memberNo);
+        memberDto.setMemberPw(null);
+        
+        ModelMapper mapper = new ModelMapper();
+        MemberVO memberVO = mapper.map(memberDto, MemberVO.class);
+        memberVO.setMemberLike(memberDao.findMemberLike(memberNo));
+        
+        return memberVO;
     }
 	
+	@GetMapping("/image/{memberNo}")
+    public void showImage(@PathVariable long memberNo,
+                          HttpServletRequest request,
+                          HttpServletResponse response) throws IOException {
+        try {
+            long attachmentNo = memberDao.findImage(memberNo);
+            String contextPath = request.getContextPath();
+            response.sendRedirect(contextPath + "/api/attachment/" + attachmentNo);
+        } catch (Exception e) {
+            // 기본 이미지 경로
+            response.sendRedirect("https://dummyimage.com/400x400/000/fff");
+        }
+    }
 }
