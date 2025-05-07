@@ -93,7 +93,7 @@ public class MemberRestController {
 	
 	@PostMapping("/signout")
 	 public void logout(@RequestHeader("Authorization") String accessToken) {
-		long memberNo = tokenService.parse(accessToken);
+		long memberNo = tokenService.parseBearerToken(accessToken);
 	    tokenDao.clean(memberNo);
 	}
 	
