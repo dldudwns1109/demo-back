@@ -48,7 +48,7 @@
     </select>
 
     <!-- 특정 모임 상세 조회 -->
-    <select id="selectOne" resultType="CrewVO" parameterType="long">
+    <select id="selectOne" resultType="CrewDto" parameterType="long">
         SELECT
             crew_no,
             crew_name,
