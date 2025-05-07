@@ -5,7 +5,7 @@
 
 <mapper namespace="crew">
 
-	<!-- 전체 모임 목록 조회 -->
+    <!-- 전체 모임 목록 조회 -->
     <select id="selectList" resultType="CrewVO">
         SELECT
             crew_no,
@@ -19,36 +19,36 @@
     </select>
     
     <select id="selectLike" resultType="CrewLikeDto">
-    	select * from crew_like
-    	where member_id = #{memberNo}
-    	and crew_no = #{crewNo}
+        select * from crew_like
+        where member_id = #{memberNo}
+        and crew_no = #{crewNo}
     </select>
     
     <insert id="updateLike">
-    	insert into crew_like (
-    		member_id, crew_no
-    	) values (
-    		#{memberNo}, #{crewNo}
-    	)
+        insert into crew_like (
+            member_id, crew_no
+        ) values (
+            #{memberNo}, #{crewNo}
+        )
     </insert>
     
     <delete id="deleteLike">
-    	delete crew_like
-    	where member_id = #{memberNo}
-    	and crew_no = #{crewNo}
+        delete from crew_like
+        where member_id = #{memberNo}
+        and crew_no = #{crewNo}
     </delete>
     
     <select id="selectSearch" resultType="CrewDto">
-    	select * from crew 
-    	where crew_category = #{category}
-    	and crew_location = #{location}
-    	<if test='keyword != "" and keyword != null'>
-    		and instr(category_name, #{keyword}) > 0
-    	</if>
+        select * from crew 
+        where crew_category = #{category}
+        and crew_location = #{location}
+        <if test='keyword != "" and keyword != null'>
+            and instr(category_name, #{keyword}) > 0
+        </if>
     </select>
 
-    <!-- 특정 모임 상세 조회 -->
-    <select id="selectOne" resultType="CrewVO" parameterType="long">
+    <!-- 특정 모임 상세 조회 - CrewDto로 변경 -->
+    <select id="selectOne" resultType="CrewDto" parameterType="long">
         SELECT
             crew_no,
             crew_name,
@@ -59,46 +59,45 @@
         FROM crew
         WHERE crew_no = #{crewNo}
     </select>
-	
-	<select id="find" resultType="CrewDto">
-		select * from crew 
-		where crew_no = #{crewNo}
-	</select>
-	
-	<select id="sequence" resultType="long">
-		select crew_seq.nextval from dual
-	</select>
-	
+
+    <select id="find" resultType="CrewDto">
+        select * from crew 
+        where crew_no = #{crewNo}
+    </select>
+
+    <select id="sequence" resultType="long">
+        select crew_seq.nextval from dual
+    </select>
+    
     <!-- 모임 등록 -->
     <insert id="insert" parameterType="CrewDto">
-	    insert into crew (
-	        crew_no,
-	        crew_name,
-	        crew_category,
-	        crew_location,
-	        crew_limit,
-	        crew_intro
-	    ) VALUES (
-	        #{crewNo},
-	        #{crewName},
-	        #{crewCategory},
-	        #{crewLocation},
-	        #{crewLimit},
-	        #{crewIntro}
-	    )
-	</insert>
-	<!--
-		useGeneratedKeys="true": DB가 생성한 key 값을 반환받겠다
-		keyProperty="crewNo": 그 값을 CrewDto의 crewNo 필드에 주입하겠다는 뜻
-	-->
-	
-	<select id="selectLikedCrew" resultType="CrewDto">
-		select * from crew
-		where crew_category in 
-		<foreach collection="list" item="memberLike" open="(" separator="," close=")">
-			#{memberLike}
-		</foreach>
-	</select>
+        insert into crew (
+            crew_no,
+            crew_name,
+            crew_category,
+            crew_location,
+            crew_limit,
+            crew_intro
+        ) VALUES (
+            #{crewNo},
+            #{crewName},
+            #{crewCategory},
+            #{crewLocation},
+            #{crewLimit},
+            #{crewIntro}
+        )
+    </insert>
+
+    <select id="selectLikedCrew" resultType="CrewDto">
+        select * from crew
+        <!--where crew_category in -->
+        where crew_no in
+        <!--<foreach collection="list" item="memberLike" open="(" separator="," close=")">-->
+        <foreach collection="list" item="crewNo" open="(" separator="," close=")">
+            <!--#{memberLike}-->
+            #{crewNo}
+        </foreach>
+    </select>
 
     <!-- 모임 수정 -->
     <update id="update" parameterType="CrewDto">
@@ -118,13 +117,14 @@
     </delete>
 
     <select id="findImage" resultType="long">
-    	select attachment_no from crew_image
-    	where crew_no = #{crewNo}
+        select attachment_no from crew_image
+        where crew_no = #{crewNo}
     </select>
-    <!-- 이미지 -->
+    
+    <!-- 이미지 연결 -->
     <insert id="connect">
-	    insert into crew_image (crew_no, attachment_no)
-	    values (#{crewNo}, #{attachmentNo})
-	</insert>
+        insert into crew_image (crew_no, attachment_no)
+        values (#{crewNo}, #{attachmentNo})
+    </insert>
 
 </mapper>

@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -122,17 +124,34 @@ public class CrewRestController {
 		return searchList;
 	}
 	
-	//모임 상세 조회
+	// 모임 상세 조회
+//	@GetMapping("/{crewNo}")
+//	public CrewDto detail(@PathVariable Long crewNo) {
+//	    CrewDto crewDto = crewDao.selectOne(crewNo);
+//	    if (crewDto == null) {
+//	        throw new RuntimeException("모임이 존재하지 않습니다.");
+//	    }
+//	    return crewDto;
+//	}
 	@GetMapping("/{crewNo}")
-    public CrewDto detail(@PathVariable Long crewNo) {
-        return crewDao.selectOne(crewNo);
-    }
-	
-	//모임 수정
-	@PutMapping("/")
-	public boolean update(@RequestBody CrewDto crewDto) {
-		return crewDao.update(crewDto);
+	public CrewDto detail(@PathVariable Long crewNo) {
+	    CrewDto crewData = crewDao.selectOne(crewNo);
+	    System.out.println("Crew Data: " + crewData); // 쿼리 결과 확인
+
+	    return crewData;
 	}
+	
+    // 모임 등록
+    @PostMapping("/")
+    public void insert(@RequestBody CrewDto crewDto) {
+        crewDao.insert(crewDto);
+    }
+
+    // 모임 수정
+    @PutMapping("/")
+    public boolean update(@RequestBody CrewDto crewDto) {
+        return crewDao.update(crewDto);
+    }
 	
 	//모임 삭제
 	@DeleteMapping("/{crewNo}")

@@ -5,56 +5,57 @@
 
 <mapper namespace="crewmember">
 
-	<select id="selectMemberCnt" resultType="long">
-		select count(*) from crew_member
-		where crew_no = #{crewNo}
-	</select>
+    <select id="selectMemberCnt" resultType="long">
+        select count(*) from crew_member
+        where crew_no = #{crewNo}
+    </select>
 
-	<!-- 모임 가입 처리 -->
-	<select id="sequence" resultType="long">
-		select crew_member_seq.nextval from dual
-	</select>
+    <!-- 모임 가입 처리 -->
+    <select id="sequence" resultType="long">
+        select crew_member_seq.nextval from dual
+    </select>
+    
     <insert id="join" parameterType="CrewMemberDto">
-	    insert into crew_member (
-			crew_member_no,
-	        crew_no,
-	        member_no,
-	        join_date,
-	        leader
-	    ) values (
-			#{crewMemberNo},
-	        #{crewNo},
-	        #{memberNo},
-	        #{joinDate},
-	        <choose>
-	            <when test="leader"> 'Y' </when>
-	            <otherwise> 'N' </otherwise>
-	        </choose>
-	    )
-	</insert>
+        insert into crew_member (
+            crew_member_no,
+            crew_no,
+            member_no,
+            join_date,
+            leader
+        ) values (
+            #{crewMemberNo},
+            #{crewNo},
+            #{memberNo},
+            #{joinDate},
+            <choose>
+                <when test="leader == true"> 'Y' </when>
+                <otherwise> 'N' </otherwise>
+            </choose>
+        )
+    </insert>
 
-    <!-- 모임 탈퇴 처리 -->
+    <!-- 모임 탈퇴 처리  -->
     <delete id="leave" parameterType="CrewMemberDto">
-        DELETE FROM crew_member
-        WHERE crew_no = #{crewNo}
-          AND member_no = #{memberNo}
+        update crew_member
+        where crew_no = #{crewNo}
+          and member_no = #{memberNo}
     </delete>
 
-    <!-- 모임장 여부 확인 -->
+    <!-- 모임장 여부 확인 - 'Y'/'N' 으로 변경 -->
     <select id="isLeader" parameterType="CrewMemberDto" resultType="boolean">
-        SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
-        FROM crew_member
-        WHERE crew_no = #{crewNo}
-          AND member_no = #{memberNo}
-          AND leader = 1
+        select case when count(*) > 0 then 1 else 0 end
+        from crew_member
+        where crew_no = #{crewNo}
+          and member_no = #{memberNo}
+          and leader = 'Y'
     </select>
 
     <!-- 모임 가입 여부 확인 -->
     <select id="isMember" parameterType="CrewMemberDto" resultType="boolean">
-        SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
-        FROM crew_member
-        WHERE crew_no = #{crewNo}
-          AND member_no = #{memberNo}
+        select case when count(*) > 0 then 1 else 0 end
+        from crew_member
+        where crew_no = #{crewNo}
+          and member_no = #{memberNo}
     </select>
 
     <!-- 특정 모임의 전체 회원 목록 -->
@@ -71,10 +72,9 @@
 
     <!-- 모임장에 의한 강퇴 -->
     <delete id="kick" parameterType="CrewMemberDto">
-        DELETE FROM crew_member
-        WHERE crew_no = #{crewNo}
-          AND member_no = #{memberNo}
+        delete from crew_member
+        where crew_no = #{crewNo}
+          and member_no = #{memberNo}
     </delete>
-
 
 </mapper>

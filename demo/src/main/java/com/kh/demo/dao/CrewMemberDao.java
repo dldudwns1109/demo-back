@@ -51,4 +51,6 @@ public class CrewMemberDao {
     public boolean kick(CrewMemberDto crewMemberDto) {
         return sqlSession.delete("crewmember.kick", crewMemberDto) > 0;
     }
+    
+    
 }

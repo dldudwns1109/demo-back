@@ -77,6 +77,20 @@ public class TokenService {
 		return parse(bearerToken.substring(7));
 	}
 	
+//	public long parseBearerToken(String bearerToken) {
+//	    if (bearerToken == null || !bearerToken.startsWith("Bearer ")) {
+//	        throw new RuntimeException("유효하지 않은 토큰 형식입니다.");
+//	    }
+//
+//	    String token = bearerToken.substring(7);
+//	    return parse(token);
+//	}
+
+
+	
+	
+	
+	
 	public boolean checkBearerToken(long memberNo, String bearerToken) {
 		TokenDto tokenDto = tokenDao.find(
 								TokenDto.builder()

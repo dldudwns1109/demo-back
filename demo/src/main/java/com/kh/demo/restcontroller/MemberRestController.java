@@ -78,6 +78,30 @@ public class MemberRestController {
 									.refreshToken(tokenService.generateRefreshToken(memberNo))
 									.build();
 	}
+//	@PostMapping("/refresh")
+//	public MemberSigninResponseVO refresh(@RequestHeader("Authorization") String refreshToken) {
+//	    try {
+//	        long memberNo = tokenService.parseBearerToken(refreshToken);
+//	        
+//	        if (!tokenService.checkBearerToken(memberNo, refreshToken)) {
+//	            throw new RuntimeException("토큰이 유효하지 않습니다.");
+//	        }
+//	        
+//	        return MemberSigninResponseVO.builder()
+//	                                    .memberNo(memberNo)
+//	                                    .accessToken(tokenService.generateAccessToken(memberNo))
+//	                                    .refreshToken(tokenService.generateRefreshToken(memberNo))
+//	                                    .build();
+//	    } catch (Exception e) {
+//	        e.printStackTrace();  // 에러 로그 출력
+//	        throw new RuntimeException("토큰 갱신 중 에러 발생");
+//	    }
+//	}
+
+
+	
+	
+	
 	
 	@PostMapping("/signout")
 	 public void logout(@RequestHeader("Authorization") String accessToken) {
