@@ -8,18 +8,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.kh.demo.dao.MemberDao;
 import com.kh.demo.dao.TokenDao;
 import com.kh.demo.dto.MemberDto;
 import com.kh.demo.error.TargetNotFoundException;
+import com.kh.demo.service.AttachmentService;
 import com.kh.demo.service.MemberService;
 import com.kh.demo.service.TokenService;
 import com.kh.demo.vo.MemberSigninRequestVO;
@@ -45,9 +49,17 @@ public class MemberRestController {
 	@Autowired
 	private TokenDao tokenDao;
 	
+	@Autowired
+	private AttachmentService attachmentService;
+	
 	@PostMapping("/signup")
-	public void signup(@RequestBody MemberVO memberVO) {
-		memberService.signup(memberVO);
+	public void signup(@ModelAttribute MemberVO memberVO, 
+			@RequestParam("memberImg") MultipartFile memberImg) throws IOException, IllegalStateException, IOException {
+		long memberNo = memberService.signup(memberVO);
+		ModelMapper mapper = new ModelMapper();
+		MemberDto memberDto = mapper.map(memberVO, MemberDto.class);
+		memberDto.setMemberNo(memberNo);
+		memberDao.connect(memberDto, attachmentService.save(memberImg));
 	}
 	
 	@PostMapping("/signin")

@@ -25,6 +25,11 @@
 		)
 	</insert>
 	
+	<insert id="connect">
+	    insert into member_profile (member_no, attachment_no)
+	    values (#{memberNo}, #{attachmentNo})
+	</insert>
+	
 	<select id="findMember" resultType="MemberDto">
 		select * from member
 		where member_id = #{memberId}
