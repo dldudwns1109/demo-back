@@ -136,7 +136,7 @@ public class PayService {
 //	}
 	
 	@Transactional
-    public void insertDB(PayApproveVO approveVO, PayReadyVO readyVO, CrewDto crewDto, long attachmentNo) {
+    public Long insertDB(PayApproveVO approveVO, PayReadyVO readyVO, CrewDto crewDto, long attachmentNo) {
         log.debug("📌 [insertDB] 결제 DB 등록 시작");
 
      // 1. 결제 대표 정보 등록
@@ -180,6 +180,7 @@ public class PayService {
 
         crewDao.connect(crewNo, saved.getAttachmentNo());
         log.debug("✅ [5] crew_image 연결 완료");
+        
 
         // 6. 모임장 등록
         long crewMemberNo = crewMemberDao.sequence();
@@ -196,5 +197,7 @@ public class PayService {
         log.debug("✅ [6] 모임장 등록 완료");
 
         log.debug("🎉 [insertDB] 전체 트랜잭션 성공 완료");
+        
+        return crewDto.getCrewNo();
     }
 }

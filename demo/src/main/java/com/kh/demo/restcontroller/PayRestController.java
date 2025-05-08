@@ -123,10 +123,11 @@ public class PayRestController {
 	    String returnUrl = returnUrlMap.remove(partnerOrderId);
 
 	    // 4. 결제 및 모임 + 모임장 DB 등록
-	    payService.insertDB(vo, readyVO, crewDto, attachmentNo);
+	    Long crewNo = payService.insertDB(vo, readyVO, crewDto, attachmentNo);
 
 	    // 5. 리다이렉트
-	    response.sendRedirect("http://localhost:5173/crew/create-finish");
+	    String redirectUrl = "http://localhost:5173/crew/create-finish?crewNo=" + crewNo;
+	    response.sendRedirect(redirectUrl);
 	}
 //	
 //	@GetMapping("/buy/cancel/{partnerOrderId}")
