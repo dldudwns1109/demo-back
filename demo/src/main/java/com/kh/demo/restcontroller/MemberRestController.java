@@ -26,6 +26,7 @@ import com.kh.demo.error.TargetNotFoundException;
 import com.kh.demo.service.AttachmentService;
 import com.kh.demo.service.MemberService;
 import com.kh.demo.service.TokenService;
+import com.kh.demo.vo.MemberCheckVO;
 import com.kh.demo.vo.MemberSigninRequestVO;
 import com.kh.demo.vo.MemberSigninResponseVO;
 import com.kh.demo.vo.MemberVO;
@@ -140,12 +141,15 @@ public class MemberRestController {
 	    memberDao.update(memberDto);
 	}
 	
-	@DeleteMapping("/{memberId}")
-	public void deleteMember(@PathVariable String memberId) {
-	    MemberDto findDto = memberDao.findMember(memberId);
+	@DeleteMapping("/{memberNo}")
+	public void deleteMember(@RequestHeader("Authorization") String accessToken, 
+			@PathVariable long memberNo) {
+	    MemberDto findDto = memberDao.findMemberByNo(memberNo);
 	    if (findDto == null) throw new RuntimeException("회원이 존재하지 않습니다");
-
 	    memberDao.deleteMember(findDto.getMemberNo());
+	    
+	    long findNo = tokenService.parseBearerToken(accessToken);
+	    tokenDao.clean(findNo);
 	}
 	
 	@GetMapping("/mypage/{memberNo}")
@@ -177,5 +181,10 @@ public class MemberRestController {
 	@GetMapping("/findMemberNo/{memberNickname}")
 	public long findMemberNo(@PathVariable String memberNickname) {
 		return memberDao.findMemberNo(memberNickname);
+	}
+	
+	@PostMapping("/checkPassword")
+	public boolean checkPassword(@RequestBody MemberCheckVO memberCheckVO) {
+		return memberService.checkPassword(memberCheckVO);
 	}
 }

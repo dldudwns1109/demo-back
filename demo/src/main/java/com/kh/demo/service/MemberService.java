@@ -13,6 +13,7 @@ import com.kh.demo.dao.MemberDao;
 import com.kh.demo.dto.MemberDto;
 import com.kh.demo.dto.MemberLikeDto;
 import com.kh.demo.util.RandomGenerator;
+import com.kh.demo.vo.MemberCheckVO;
 import com.kh.demo.vo.MemberVO;
 
 import jakarta.mail.MessagingException;
@@ -73,5 +74,12 @@ public class MemberService {
 		
 		findDto.setMemberPw(passwordEncoder.encode(tempPassword));
 		memberDao.updatePassword(findDto);
+	}
+	
+	public boolean checkPassword(MemberCheckVO memberCheckVO) {
+		MemberDto findDto = memberDao.findMemberByNo(memberCheckVO.getMemberNo());
+		if (findDto == null) return false;
+		
+		return passwordEncoder.matches(memberCheckVO.getMemberPw(), findDto.getMemberPw());
 	}
 }
