@@ -47,7 +47,8 @@
         </if>
     </select>
 
-    <!-- 특정 모임 상세 조회 - CrewDto로 변경 -->
+
+    <!-- 특정 모임 상세 조회 -->
     <select id="selectOne" resultType="CrewDto" parameterType="long">
         SELECT
             crew_no,

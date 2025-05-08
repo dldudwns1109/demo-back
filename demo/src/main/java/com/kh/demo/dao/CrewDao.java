@@ -91,4 +91,8 @@ public class CrewDao {
 	public List<CrewDto> selectLikedGroup(List<String> memberLike) {
 		return sqlSession.selectList("crew.selectLikedCrew", memberLike);
 	}
+	
+	public List<CrewDto> selectGroupByNo(long crewNo) {
+		return sqlSession.selectList("crew.find", crewNo);
+	}
 }

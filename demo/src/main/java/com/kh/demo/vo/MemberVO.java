@@ -16,6 +16,5 @@ public class MemberVO {
 	private char memberGender;
 	private String memberBirth;
 	private String memberMbti;
-	private String memberImg;
 	private List<String> memberLike;
 }

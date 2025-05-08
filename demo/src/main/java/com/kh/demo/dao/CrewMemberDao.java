@@ -52,5 +52,16 @@ public class CrewMemberDao {
         return sqlSession.delete("crewmember.kick", crewMemberDto) > 0;
     }
     
+    public List<Long> findCreated(long memberNo) {
+    	return sqlSession.selectList("crewmember.findCreated", memberNo);
+    }
+    
+    public List<Long> findJoined(long memberNo) {
+    	return sqlSession.selectList("crewmember.findJoined", memberNo);
+    }
+    
+    public List<Long> findLiked(long memberNo) {
+    	return sqlSession.selectList("crewmember.findLiked", memberNo);
+    }
     
 }

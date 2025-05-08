@@ -1,11 +1,14 @@
 package com.kh.demo.dao;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.kh.demo.dto.AttachmentDto;
 import com.kh.demo.dto.MemberDto;
 import com.kh.demo.dto.MemberLikeDto;
 
@@ -25,6 +28,13 @@ public class MemberDao {
 	
 	public void insertLike(MemberLikeDto memberLikeDto) {
 		sqlSession.insert("member.insertLike", memberLikeDto);
+	}
+	
+	public void connect(MemberDto memberDto, AttachmentDto attachmentDto) {
+		Map<String, Object> params = new HashMap<>();
+		params.put("memberNo", memberDto.getMemberNo());
+		params.put("attachmentNo", attachmentDto.getAttachmentNo());
+		sqlSession.insert("member.connect", params);
 	}
 	
 	public MemberDto findMember(String memberId) {
@@ -61,5 +71,9 @@ public class MemberDao {
 	
 	public List<String> findMemberLike(long memberNo) {
 		return sqlSession.selectList("member.findMemberLike", memberNo);
+	}
+	
+	public long findImage(long memberNo) {
+		return sqlSession.selectOne("member.findImage", memberNo);
 	}
 }

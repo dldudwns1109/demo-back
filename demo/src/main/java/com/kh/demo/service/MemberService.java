@@ -32,7 +32,7 @@ public class MemberService {
 	@Autowired
 	private RandomGenerator randomGenerator;
 	
-	public void signup(MemberVO memberVO) {
+	public long signup(MemberVO memberVO) {
 		ModelMapper mapper = new ModelMapper();
 		MemberDto memberDto = mapper.map(memberVO, MemberDto.class);
 		memberDto.setMemberNo(memberDao.sequence());
@@ -46,6 +46,8 @@ public class MemberService {
 				.build()
 			);			
 		}
+		
+		return memberDto.getMemberNo();
 	}
 	
 	public MemberDto signin(MemberDto memberDto) {

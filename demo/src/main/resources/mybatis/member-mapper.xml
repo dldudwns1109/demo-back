@@ -25,6 +25,11 @@
 		)
 	</insert>
 	
+	<insert id="connect">
+	    insert into member_profile (member_no, attachment_no)
+	    values (#{memberNo}, #{attachmentNo})
+	</insert>
+	
 	<select id="findMember" resultType="MemberDto">
 		select * from member
 		where member_id = #{memberId}
@@ -90,5 +95,10 @@
 		select member_like from member_like
 		where member_no = #{memberNo} 
 	</select>
+	
+	<select id="findImage" resultType="long">
+    	select attachment_no from member_profile
+    	where member_no = #{memberNo}
+    </select>
 
 </mapper>
