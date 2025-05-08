@@ -40,10 +40,12 @@
     
     <select id="selectSearch" resultType="CrewDto">
         select * from crew 
-        where crew_category = #{category}
-        and crew_location = #{location}
+        where crew_location = #{location}
+        <if test='category != "전체"'>
+        	and crew_category = #{category}
+        </if>
         <if test='keyword != "" and keyword != null'>
-            and instr(category_name, #{keyword}) > 0
+            and instr(crew_name, #{keyword}) > 0
         </if>
     </select>
 

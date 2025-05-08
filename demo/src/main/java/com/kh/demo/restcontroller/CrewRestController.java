@@ -184,7 +184,7 @@ public class CrewRestController {
 							.build()
 					))
 					.crewMemberCnt(crewMemberDao.selectMemberCnt(crew.getCrewNo()))
-//					.crewAttachmentNo(crewDao.findImage(crew.getCrewNo()))
+					.crewAttachmentNo(crewDao.findImage(crew.getCrewNo()))
 				.build()
 			);
 		}
@@ -214,22 +214,13 @@ public class CrewRestController {
 							.build()
 					))
 					.crewMemberCnt(crewMemberDao.selectMemberCnt(crew.getCrewNo()))
-//					.crewAttachmentNo(crewDao.findImage(crew.getCrewNo()))
+					.crewAttachmentNo(crewDao.findImage(crew.getCrewNo()))
 				.build()
 			);
 		}
 		return searchList;
 	}
 	
-	// 모임 상세 조회
-//	@GetMapping("/{crewNo}")
-//	public CrewDto detail(@PathVariable Long crewNo) {
-//	    CrewDto crewDto = crewDao.selectOne(crewNo);
-//	    if (crewDto == null) {
-//	        throw new RuntimeException("모임이 존재하지 않습니다.");
-//	    }
-//	    return crewDto;
-//	}
 	@GetMapping("/{crewNo}")
 	public CrewDto detail(@PathVariable Long crewNo) {
 	    CrewDto crewData = crewDao.selectOne(crewNo);
