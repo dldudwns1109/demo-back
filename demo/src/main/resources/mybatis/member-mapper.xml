@@ -100,5 +100,10 @@
     	select attachment_no from member_profile
     	where member_no = #{memberNo}
     </select>
+    
+    <select id="findMemberNo" resultType="long">
+		select member_no from member
+		where member_nickname = #{memberNickname}
+    </select>
 
 </mapper>

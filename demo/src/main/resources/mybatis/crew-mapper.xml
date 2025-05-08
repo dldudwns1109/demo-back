@@ -91,12 +91,12 @@
 
     <select id="selectLikedCrew" resultType="CrewDto">
         select * from crew
-        <!--where crew_category in -->
-        where crew_no in
-        <!--<foreach collection="list" item="memberLike" open="(" separator="," close=")">-->
-        <foreach collection="list" item="crewNo" open="(" separator="," close=")">
-            <!--#{memberLike}-->
-            #{crewNo}
+        where crew_category in
+<!--         where crew_no in -->
+        <foreach collection="list" item="memberLike" open="(" separator="," close=")">
+<!--         <foreach collection="list" item="crewNo" open="(" separator="," close=")"> -->
+            #{memberLike}
+<!--             #{crewNo} -->
         </foreach>
     </select>
 

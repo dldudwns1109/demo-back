@@ -76,4 +76,8 @@ public class MemberDao {
 	public long findImage(long memberNo) {
 		return sqlSession.selectOne("member.findImage", memberNo);
 	}
+	
+	public long findMemberNo(String memberNickname) {
+		return sqlSession.selectOne("member.findMemberNo", memberNickname);
+	}
 }
