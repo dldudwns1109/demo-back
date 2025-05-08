@@ -13,6 +13,8 @@ import com.kh.demo.dto.TokenDto;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
+
 
 @Service
 public class TokenService {
@@ -69,6 +71,10 @@ public class TokenService {
 		
 		return ((Integer) claims.get("memberNo")).longValue();
 	}
+
+
+	
+
 	
 	public long parseBearerToken(String bearerToken) {
 		if (bearerToken == null || !bearerToken.startsWith("Bearer ")) 
@@ -85,9 +91,6 @@ public class TokenService {
 //	    String token = bearerToken.substring(7);
 //	    return parse(token);
 //	}
-
-
-	
 	
 	
 	
