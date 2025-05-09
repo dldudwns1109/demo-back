@@ -13,7 +13,7 @@ public class MeetingDto {
 	private Long meetingCrewNo;
 	private Long meetingOwnerNo;
 	private String meetingName;
-	private String meetingDate;
+	private Timestamp meetingDate;
 	private String meetingLocation;
 	private Long meetingPrice;
 	private Long meetingLimit;
