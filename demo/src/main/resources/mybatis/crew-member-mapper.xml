@@ -1,81 +1,75 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper
-  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="crewmember">
 
-    <select id="selectMemberCnt" resultType="long">
-        select count(*) from crew_member
-        where crew_no = #{crewNo}
-    </select>
+	<select id="selectMemberCnt" resultType="long">
+		select count(*) from crew_member
+		where crew_no = #{crewNo}
+	</select>
 
-    <!-- 모임 가입 처리 -->
-    <select id="sequence" resultType="long">
-        select crew_member_seq.nextval from dual
-    </select>
-    
-    <insert id="join" parameterType="CrewMemberDto">
-        insert into crew_member (
-            crew_member_no,
-            crew_no,
-            member_no,
-            join_date,
-            leader
-        ) values (
-            #{crewMemberNo},
-            #{crewNo},
-            #{memberNo},
-            #{joinDate},
-            <choose>
-                <when test="leader == true"> 'Y' </when>
-                <otherwise> 'N' </otherwise>
-            </choose>
-        )
-    </insert>
+	<!-- 모임 가입 처리 -->
+	<select id="sequence" resultType="long">
+		select crew_member_seq.nextval from dual
+	</select>
 
-    <!-- 모임 탈퇴 처리  -->
-    <delete id="leave" parameterType="CrewMemberDto">
-        update crew_member
-        where crew_no = #{crewNo}
-          and member_no = #{memberNo}
-    </delete>
+	<insert id="join" parameterType="CrewMemberDto"> insert into crew_member (
+		crew_member_no, crew_no, member_no, join_date, leader ) values (
+		#{crewMemberNo}, #{crewNo}, #{memberNo}, #{joinDate}, <choose>
+			<when test="leader == true"> 'Y' </when>
+			<otherwise> 'N' </otherwise>
+		</choose> ) </insert>
 
-    <!-- 모임장 여부 확인 - 'Y'/'N' 으로 변경 -->
-    <select id="isLeader" parameterType="CrewMemberDto" resultType="boolean">
-        select case when count(*) > 0 then 1 else 0 end
-        from crew_member
-        where crew_no = #{crewNo}
-          and member_no = #{memberNo}
-          and leader = 'Y'
-    </select>
+	<!-- 모임 탈퇴 처리  -->
+	<delete id="leave" parameterType="CrewMemberDto">
+		update crew_member
+		where crew_no = #{crewNo}
+		and member_no = #{memberNo}
+	</delete>
 
-    <!-- 모임 가입 여부 확인 -->
-    <select id="isMember" parameterType="CrewMemberDto" resultType="boolean">
-        select case when count(*) > 0 then 1 else 0 end
-        from crew_member
-        where crew_no = #{crewNo}
-          and member_no = #{memberNo}
-    </select>
+	<!-- 모임장 여부 확인 - 'Y'/'N' 으로 변경 -->
+	<select id="isLeader" parameterType="CrewMemberDto" resultType="boolean">
+		select 
+        	case when count(*) > 0 then 1 else 0 end
+    	from crew_member
+		where crew_no = #{crewNo}
+		and member_no = #{memberNo}
+		and leader = 'Y'
+	</select>
 
-    <!-- 특정 모임의 전체 회원 목록 -->
-    <select id="selectListByCrew" parameterType="long" resultType="CrewMemberVO">
-        SELECT
-            crew_no,
-            member_no,
-            join_date,
-            leader
-        FROM crew_member
-        WHERE crew_no = #{crewNo}
-        ORDER BY join_date DESC
-    </select>
+	<!-- 모임 가입 여부 확인 -->
+	<select id="isMember" parameterType="CrewMemberDto" resultType="boolean">
+		select 
+        	case when count(*) > 0 then 1 else 0 end
+    	from crew_member
+		where crew_no = #{crewNo}
+		and member_no = #{memberNo}
+	</select>
 
-    <!-- 모임장에 의한 강퇴 -->
-    <delete id="kick" parameterType="CrewMemberDto">
-        delete from crew_member
-        where crew_no = #{crewNo}
-          and member_no = #{memberNo}
-    </delete>
+	<!-- 특정 모임의 전체 회원 목록 -->
+	<select id="selectListByCrew" parameterType="long" resultType="CrewMemberVO">
+		select
+		crew_member.crew_no as crewNo,
+		crew_member.member_no as memberNo,
+		crew_member.join_date as joinDate,
+		crew_member.leader as leader,
+		member.member_nickname as nickname,
+		member.member_birth as birth,
+		member.member_mbti as mbti,
+		member.member_location as location
+		from crew_member
+		left join member on crew_member.member_no = member.member_no
+		where crew_member.crew_no = #{crewNo}
+		order by crew_member.join_date desc
+	</select>
+
+
+	<!-- 모임장에 의한 강퇴 -->
+	<delete id="kick" parameterType="CrewMemberDto">
+		delete from crew_member
+		where crew_no = #{crewNo}
+		and member_no = #{memberNo}
+	</delete>
 
 	<select id="findCreated" resultType="long">
 		select crew_no from crew_member
@@ -83,14 +77,14 @@
 		and leader = 'Y'
 		order by join_date desc
 	</select>
-	
+
 	<select id="findJoined" resultType="long">
 		select crew_no from crew_member
 		where member_no = #{memberNo}
 		and leader = 'N'
 		order by join_date desc
 	</select>
-	
+
 	<select id="findLiked" resultType="long">
 		select crew_no from crew_like
 		where member_id = #{memberNo}

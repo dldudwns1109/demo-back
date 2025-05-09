@@ -64,4 +64,5 @@ public class CrewMemberDao {
     	return sqlSession.selectList("crewmember.findLiked", memberNo);
     }
     
+    
 }

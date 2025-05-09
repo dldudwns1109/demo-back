@@ -22,7 +22,7 @@ import com.kh.demo.vo.CrewMemberVO;
 
 @CrossOrigin
 @RestController
-@RequestMapping("/api/crew")
+@RequestMapping("/api/crewmember")
 public class CrewMemberRestController {
 
 	@Autowired
@@ -66,24 +66,54 @@ public class CrewMemberRestController {
 	}
 	
 	//모임장 여부 확인
+//	@GetMapping("/{crewNo}/leader")
+//	public boolean leader(@PathVariable Long crewNo,
+//						@RequestHeader("Authorization") String token) {
+//		long memberNo = tokenService.parse(token);
+//		
+//		CrewMemberDto crewMemberDto = CrewMemberDto.builder()
+//					.crewNo(crewNo)
+//					.memberNo(memberNo)
+//				.build();
+//		
+//		return crewMemberDao.isLeader(crewMemberDto);
+//	}
+	// 모임장 여부 확인
 	@GetMapping("/{crewNo}/leader")
-	public boolean leader(@PathVariable Long crewNo,
-						@RequestHeader("Authorization") String token) {
-		long memberNo = tokenService.parse(token);
-		
-		CrewMemberDto crewMemberDto = CrewMemberDto.builder()
-					.crewNo(crewNo)
-					.memberNo(memberNo)
-				.build();
-		
-		return crewMemberDao.isLeader(crewMemberDto);
+	public boolean leader(@PathVariable Long crewNo, @RequestHeader("Authorization") String token) {
+	    try {
+	        System.out.println("Received Token: " + token);
+
+	        // JWT 파싱
+	        long memberNo = tokenService.parseBearerToken(token);
+	        System.out.println("Parsed Member No: " + memberNo);
+
+	        CrewMemberDto crewMemberDto = CrewMemberDto.builder()
+	                .crewNo(crewNo)
+	                .memberNo(memberNo)
+	                .build();
+	        
+	        boolean isLeader = crewMemberDao.isLeader(crewMemberDto);
+	        System.out.println("Is Leader: " + isLeader);
+
+	        return isLeader;
+
+	    } catch (Exception e) {
+	        System.err.println("Error in leader() method: " + e.getMessage());
+	        e.printStackTrace();
+	        throw new RuntimeException("Error while checking leader status");
+	    }
 	}
+
+
+
+	
 	
 	//가입 여부 확인
 	@GetMapping("/{crewNo}/member")
 	public boolean member(@PathVariable Long crewNo,
 						@RequestHeader("Authorization") String token) {
-		long memberNo = tokenService.parse(token);
+		long memberNo = tokenService.parseBearerToken(token);
 		
 		CrewMemberDto crewMemberDto = CrewMemberDto.builder()
 					.crewNo(crewNo)
@@ -93,11 +123,17 @@ public class CrewMemberRestController {
 		return crewMemberDao.isMember(crewMemberDto);
 	}
 	
-	//모임 전체 회원 조회
+//	모임 전체 회원 조회
 	@GetMapping("/{crewNo}/members")
 	public List<CrewMemberVO> selectListByCrew(@PathVariable Long crewNo) {
 		return crewMemberDao.selectListByCrew(crewNo);
 	}
+//	@GetMapping("/{crewNo}/members")
+//	public List<CrewMemberVO> selectListByCrew(@PathVariable Long crewNo) {
+//	    List<CrewMemberVO> members = crewMemberDao.selectListByCrew(crewNo);
+//	    System.out.println("Fetched Members Data: " + members);
+//	    return members;
+//	}
 	
 	//모임장 회원 강퇴
 	@DeleteMapping("/{crewNo}/kick/{memberNo}")
@@ -121,6 +157,8 @@ public class CrewMemberRestController {
 		
 		return crewMemberDao.kick(kickDto);
 	}
+	
+	
 	
 	
 }
