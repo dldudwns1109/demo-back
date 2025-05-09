@@ -13,12 +13,40 @@
 		select crew_member_seq.nextval from dual
 	</select>
 
-	<insert id="join" parameterType="CrewMemberDto"> insert into crew_member (
-		crew_member_no, crew_no, member_no, join_date, leader ) values (
-		#{crewMemberNo}, #{crewNo}, #{memberNo}, #{joinDate}, <choose>
-			<when test="leader == true"> 'Y' </when>
-			<otherwise> 'N' </otherwise>
-		</choose> ) </insert>
+	<!--<insert id="join" parameterType="CrewMemberDto"> 
+		insert into crew_member (
+			crew_member_no, 
+			crew_no, member_no, 
+			join_date, 
+			leader 
+		) values (
+			#{crewMemberNo}, 
+			#{crewNo}, 
+			#{memberNo}, 
+			#{joinDate}, 
+			<choose>
+				<when test="leader == true"> 'Y' </when>
+				<otherwise> 'N' </otherwise>
+			</choose> 
+		) 
+	</insert>-->
+	<insert id="join" parameterType="CrewMemberDto">
+		insert into crew_member (
+		crew_member_no,
+		crew_no,
+		member_no,
+		join_date,
+		leader
+		)
+		values (
+		#{crewMemberNo},
+		#{crewNo},
+		#{memberNo},
+		#{joinDate},
+		CASE WHEN #{leader} = 'Y' THEN 'Y' ELSE 'N' END
+		)
+	</insert>
+
 
 	<!-- 모임 탈퇴 처리  -->
 	<delete id="leave" parameterType="CrewMemberDto">
@@ -27,14 +55,21 @@
 		and member_no = #{memberNo}
 	</delete>
 
-	<!-- 모임장 여부 확인 - 'Y'/'N' 으로 변경 -->
-	<select id="isLeader" parameterType="CrewMemberDto" resultType="boolean">
+	<!-- 모임장 여부 확인 -->
+	<!--<select id="isLeader" parameterType="CrewMemberDto" resultType="boolean">
 		select 
         	case when count(*) > 0 then 1 else 0 end
     	from crew_member
 		where crew_no = #{crewNo}
 		and member_no = #{memberNo}
 		and leader = 'Y'
+	</select>-->
+	<select id="isLeader" parameterType="CrewMemberDto" resultType="boolean">
+		select
+		leader = 'Y'
+		from crew_member
+		where crew_no = #{crewNo}
+		and member_no = #{memberNo}
 	</select>
 
 	<!-- 모임 가입 여부 확인 -->
