@@ -1,10 +1,13 @@
 package com.kh.demo.restcontroller;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,7 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.kh.demo.dao.MemberDao;
 import com.kh.demo.dao.TokenDao;
 import com.kh.demo.dto.MemberDto;
-import com.kh.demo.error.TargetNotFoundException;
+import com.kh.demo.dto.MemberLikeDto;
 import com.kh.demo.service.AttachmentService;
 import com.kh.demo.service.MemberService;
 import com.kh.demo.service.TokenService;
@@ -128,17 +131,48 @@ public class MemberRestController {
 		else return true;
 	}
 	
-	@PatchMapping("/{memberId}")
-	public void edit(@PathVariable String memberId, 
-						@RequestBody MemberDto memberDto) {
-		memberDto.setMemberId(memberId);
-		
-	    MemberDto findDto = memberDao.findMember(memberId);
-	    if (findDto == null) throw new RuntimeException("대상 회원이 없습니다");
+	@PatchMapping(value = "/{memberNo}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public void edit(@PathVariable long memberNo,
+	                 @ModelAttribute MemberDto memberDto,
+	                 @ModelAttribute MemberLikeDto memberLikeDto,
+	                 @RequestParam(required = false) MultipartFile attach) throws IOException {
+	    
+	    memberDto.setMemberNo(memberNo);
 
-	    memberDto.setMemberNo(findDto.getMemberNo());
+	    // 1. 기존 정보 확인
+	    MemberDto origin = memberDao.findMemberByNo(memberNo);
+	    if (origin == null) throw new RuntimeException("회원 없음");
 
+	    // 2. 이미지 변경
+	    if (attach != null && !attach.isEmpty()) {
+	        Long oldAttachmentNo = memberDao.findImage(memberNo);
+	        if (oldAttachmentNo != null) {
+	            memberDao.disconnectProfile(memberNo);
+	            attachmentService.delete(oldAttachmentNo);
+	        }
+	        Long newAttachmentNo = attachmentService.save(attach).getAttachmentNo();
+	        memberDao.connect(memberNo, newAttachmentNo);
+	    }
+
+	    // 3. 회원 정보 수정
 	    memberDao.update(memberDto);
+	    
+	    // 4. 관심사 수정
+	    memberDao.updateLikes(memberNo, memberLikeDto.getMemberLike());
+	}
+	
+	@GetMapping("/{memberNo}")
+	public MemberVO getMemberInfo(@PathVariable long memberNo) {
+	    MemberDto memberDto = memberDao.findMemberByNo(memberNo);
+	    if (memberDto == null) throw new RuntimeException("회원 없음");
+
+	    memberDto.setMemberPw(null); // 비밀번호 제거
+
+	    ModelMapper mapper = new ModelMapper();
+	    MemberVO memberVO = mapper.map(memberDto, MemberVO.class);
+	    memberVO.setMemberLike(memberDao.findMemberLike(memberNo));
+
+	    return memberVO;
 	}
 	
 	@DeleteMapping("/{memberNo}")
@@ -165,18 +199,17 @@ public class MemberRestController {
     }
 	
 	@GetMapping("/image/{memberNo}")
-    public void showImage(@PathVariable long memberNo,
-                          HttpServletRequest request,
-                          HttpServletResponse response) throws IOException {
-        try {
-            long attachmentNo = memberDao.findImage(memberNo);
-            String contextPath = request.getContextPath();
-            response.sendRedirect(contextPath + "/api/attachment/" + attachmentNo);
-        } catch (Exception e) {
-            // 기본 이미지 경로
-            response.sendRedirect("https://dummyimage.com/400x400/000/fff");
-        }
-    }
+	public void showImage(@PathVariable long memberNo,
+	                      HttpServletRequest request,
+	                      HttpServletResponse response) throws IOException {
+	    try {
+	        long attachmentNo = memberDao.findImage(memberNo);
+	        String contextPath = request.getContextPath();
+	        response.sendRedirect(contextPath + "/api/attachment/" + attachmentNo);
+	    } catch (Exception e) {
+	        response.sendRedirect("https://dummyimage.com/400x400/000/fff");
+	    }
+	}
 	
 	@GetMapping("/findMemberNo/{memberNickname}")
 	public long findMemberNo(@PathVariable String memberNickname) {
