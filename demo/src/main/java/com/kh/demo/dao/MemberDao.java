@@ -73,6 +73,10 @@ public class MemberDao {
 		return sqlSession.update("member.updatePassword", memberDto) > 0;
 	}
 	
+	public boolean updatePasswordByNo(MemberDto memberDto) {
+		return sqlSession.update("member.updatePasswordByNo", memberDto) > 0;
+	}
+	
 	public boolean update(MemberDto memberDto) {
 		return sqlSession.update("member.editUnit", memberDto) > 0;
 	}

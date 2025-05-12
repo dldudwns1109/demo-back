@@ -1,13 +1,14 @@
 package com.kh.demo.restcontroller;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -113,6 +114,11 @@ public class MemberRestController {
 		memberService.sendTempPassword(memberEmail.get("memberEmail"));
 	}
 	
+	@PatchMapping("/changePw")
+	public boolean changePassword(@RequestBody MemberCheckVO vo) {
+	    return memberService.changePassword(vo.getMemberNo(), vo.getMemberPw());
+	}
+	
 	@GetMapping("/checkDuplicatedId/{memberId}")
 	public boolean checkDuplicatedId(@PathVariable String memberId) {
 		if (memberDao.findMember(memberId) == null) return false;
@@ -129,6 +135,21 @@ public class MemberRestController {
 	public boolean checkDuplicatedNickname(@PathVariable String memberNickname) {
 		if (memberDao.findMemberByNickname(memberNickname) == null) return false;
 		else return true;
+	}
+	
+	@GetMapping("/checkNickname/{memberNickname}") //개인정보수정 시 소유자 정보 포함 중복 검사
+	public Map<String, Object> checkNickname(@PathVariable String memberNickname) {
+	    Map<String, Object> result = new HashMap<>();
+	    MemberDto member = memberDao.findMemberByNickname(memberNickname);
+	    
+	    if (member == null) {
+	        result.put("isDuplicated", false);
+	    } else {
+	        result.put("isDuplicated", true);
+	        result.put("nicknameOwnerUserNo", member.getMemberNo());
+	    }
+
+	    return result;
 	}
 	
 	@PatchMapping(value = "/{memberNo}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
