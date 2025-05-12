@@ -26,12 +26,11 @@ public class BoardDao {
 	public List<BoardVO> selectListByCategory(String boardCategory) {
 		return sqlSession.selectList("board.selectListByCategory", boardCategory);
 	}
-	
+
 	// 특정 게시글 조회
 	public BoardDto selectOne(Long boardNo) {
 		return sqlSession.selectOne("board.selectOne", boardNo);
 	}
-
 
 	// 게시글 등록
 	public void insert(BoardDto boardDto) {
@@ -47,31 +46,29 @@ public class BoardDao {
 	public boolean delete(Long boardNo) {
 		return sqlSession.delete("board.delete", boardNo) > 0;
 	}
-	
-	// 특정 크루 번호의 게시글 전체 조회
-    public List<BoardVO> selectListByCrewNo(Long crewNo) {
-        return sqlSession.selectList("board.selectListByCrewNo", crewNo);
-    }
 
-    // 특정 크루 번호 + 카테고리별 게시글 조회
-    public List<BoardVO> selectListByCrewNoAndCategory(Long crewNo, String boardCategory) {
+	// 특정 크루 번호의 게시글 전체 조회
+	public List<BoardVO> selectListByCrewNo(Long crewNo) {
+		return sqlSession.selectList("board.selectListByCrewNo", crewNo);
+	}
+
+	// 특정 크루 번호 + 카테고리별 게시글 조회
+	public List<BoardVO> selectListByCrewNoAndCategory(Long crewNo, String boardCategory) {
+		Map<String, Object> param = new HashMap<>();
+		param.put("crewNo", crewNo);
+		param.put("category", boardCategory);
+		return sqlSession.selectList("board.selectListByCrewNoAndCategory", param);
+	}
+
+	// crew_no가 NULL인 게시글 목록 조회
+	public List<BoardVO> selectJoinBoardList() {
+		return sqlSession.selectList("board.selectJoinBoardList");
+	}
+	
+	// crew_no가 NULL인 게시글 목록 중 카테고리 필터링
+    public List<BoardVO> selectJoinBoardListByCategory(String category) {
         Map<String, Object> param = new HashMap<>();
-        param.put("crewNo", crewNo);
-        param.put("category", boardCategory);
-        return sqlSession.selectList("board.selectListByCrewNoAndCategory", param);
+        param.put("category", category);
+        return sqlSession.selectList("board.selectJoinBoardListByCategory", param);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

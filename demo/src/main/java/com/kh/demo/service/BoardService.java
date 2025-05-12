@@ -53,4 +53,13 @@ public class BoardService {
 	public boolean delete(Long boardNo) {
 		return boardDao.delete(boardNo);
 	}
+	
+	 // crew_no가 NULL인 게시글 목록 (카테고리 필터링 포함)
+    public List<BoardVO> getJoinBoardList(String category) {
+        if (category == null || category.equals("전체")) {
+            return boardDao.selectJoinBoardList();
+        }
+        return boardDao.selectJoinBoardListByCategory(category);
+    }
+    
 }

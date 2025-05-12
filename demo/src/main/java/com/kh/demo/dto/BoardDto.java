@@ -17,6 +17,7 @@ public class BoardDto {
 	private Timestamp boardWriteTime; // 작성 시간
 	private String boardContent; // 게시글 본문
 	private long boardReply; // 댓글 수
+	private Long boardWriterProfileUrl;
 	
 	private String boardWriterNickname; //작성자 닉네임
 	private String boardWriterGender; //작성자 성별

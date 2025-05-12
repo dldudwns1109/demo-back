@@ -82,4 +82,8 @@ public class MemberService {
 		
 		return passwordEncoder.matches(memberCheckVO.getMemberPw(), findDto.getMemberPw());
 	}
+	public MemberDto getMemberProfile(Long memberNo) {
+		return memberDao.findMemberByNo(memberNo);
+	}
+	
 }
