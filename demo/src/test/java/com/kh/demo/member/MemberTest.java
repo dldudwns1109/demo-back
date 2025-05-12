@@ -8,10 +8,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import com.kh.demo.dao.MemberDao;
 import com.kh.demo.dao.TokenDao;
-import com.kh.demo.dto.MemberDto;
-import com.kh.demo.dto.TokenDto;
 import com.kh.demo.service.MemberService;
 import com.kh.demo.service.TokenService;
+import com.kh.demo.vo.MemberCheckVO;
 
 import jakarta.mail.MessagingException;
 import lombok.extern.slf4j.Slf4j;
@@ -85,5 +84,17 @@ public class MemberTest {
 //	    TokenDto findToken = tokenDao.find(tokenDto);
 //
 //	    System.out.println("findToken = " + findToken);
+//		    // 실제 DB에 존재하는 회원 번호 (예: testjinyoung의 번호 83)
+//		    long testMemberNo = 83L;
+//		    String testInputPassword = "ad"; // 입력할 평문 비밀번호
+//
+//		    boolean result = memberService.checkPassword(
+//		        MemberCheckVO.builder()
+//		            .memberNo(testMemberNo)
+//		            .memberPw(testInputPassword)
+//		            .build()
+//		    );
+//
+//		    log.debug(">> 비밀번호 일치 여부: {}", result); // true or false 출력
 	}
 }
