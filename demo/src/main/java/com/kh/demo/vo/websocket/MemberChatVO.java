@@ -4,5 +4,6 @@ import lombok.Data;
 
 @Data
 public class MemberChatVO {
+	private Long target;
 	private String content;
 }

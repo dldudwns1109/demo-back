@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="chat">
+	<select id="roomSequence" resultType="long">
+		select chat_room_seq.nextval from dual
+	</select>
+	<insert id="insert">
+		insert into chat (
+			chat_no, chat_room_no, chat_crew_no, 
+			chat_type, chat_content, chat_time, 
+			chat_sender, chat_receiver
+		) values (
+			chat_seq.nextval, #{chatRoomNo}, #{chatCrewNo}, 
+			#{chatType}, #{chatContent}, #{chatTime}, 
+			#{chatSender}, #{chatReceiver}
+		)
+	</insert>
+	<select id="findChatList" resultType="long">
+		select chat_room_no from (
+			select chat_room_no, max(chat_time) as time
+			from chat
+			where chat_sender = #{memberNo}
+			or chat_receiver = #{memberNo}
+			group by chat_room_no
+		) order by time desc
+	</select>
+	<select id="findChatRoom" resultType="ChatDto">
+		select * from (
+			select * from chat
+			where chat_room_no = #{chatRoomNo}
+			order by chat_time desc
+		) where rownum = 1
+	</select>
+</mapper>

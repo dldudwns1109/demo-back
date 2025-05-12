@@ -42,6 +42,7 @@ public class MemberChatController {
 		MemberDto memberDto = memberDao.findMemberByNo(memberNo);
 		
 		MemberChatVO vo = message.getPayload();
+		log.debug("target = {}", vo.getTarget());
 		log.debug("content = {}", vo.getContent());
 		
 		MemberChatResponseVO response = MemberChatResponseVO.builder()
@@ -51,6 +52,7 @@ public class MemberChatController {
 				.time(LocalDateTime.now())
 				.build();
 		
-		messagingTemplate.convertAndSend("/public/member/chat", response);
+		messagingTemplate.convertAndSend("/private/member/chat/" 
+				+ String.valueOf(vo.getTarget()), response);
 	}
 }
