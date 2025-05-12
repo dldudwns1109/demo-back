@@ -94,5 +94,17 @@ public class BoardRestController {
         }
         return member;
     }
+	
+	@GetMapping("/image/{attachmentNo}")
+    public BoardVO getProfileImage(@PathVariable Long attachmentNo) {
+        BoardVO vo = new BoardVO();
+        vo.setBoardWriterProfileUrl(attachmentNo);
+
+        // 이미지 경로 생성
+        String profileUrl = attachmentNo != 0 ? "/uploads/" + attachmentNo + ".jpg" : "/images/default-profile.png";
+        vo.setBoardWriterProfileUrl(attachmentNo); // attachment_no 그대로 전달
+
+        return vo;
+    }
 
 }

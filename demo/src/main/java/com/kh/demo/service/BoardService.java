@@ -61,4 +61,5 @@ public class BoardService {
         }
         return boardDao.selectJoinBoardListByCategory(category);
     }
+    
 }

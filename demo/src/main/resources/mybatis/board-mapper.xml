@@ -14,6 +14,7 @@
             board.board_content,
             member.member_nickname as board_writer_nickname,
             <!--member_profile.attachment_no as board_writer_profile_url,-->
+            nvl(member_profile.attachment_no, 0) as board_writer_profile_url,
             board.board_wtime as board_write_time,
             board.board_reply,
             member.member_gender as board_writer_gender,
@@ -23,7 +24,7 @@
             member.member_school as board_writer_school
         from board
         left join member on board.board_writer = member.member_no
-        <!--left join member_profile on member.member_no = member_profile.member_no-->
+        left join member_profile on member.member_no = member_profile.member_no
         order by board.board_wtime desc
     </select>
 
@@ -35,7 +36,7 @@
             board.board_category,
             board.board_content,
             member.member_nickname as board_writer_nickname,
-            <!--member_profile.attachment_no as board_writer_profile_url,-->
+            member_profile.attachment_no as board_writer_profile_url,
             board.board_wtime as board_write_time,
             board.board_reply,
             member.member_gender as board_writer_gender,
@@ -45,7 +46,7 @@
             member.member_school as board_writer_school
         from board
         left join member on board.board_writer = member.member_no
-        <!--left join member_profile on member.member_no = member_profile.member_no-->
+        left join member_profile on member.member_no = member_profile.member_no
         where board.board_category = #{category}
         order by board.board_wtime desc
     </select>
@@ -62,6 +63,7 @@
             board.board_content,
             board.board_reply,
             member.member_nickname as board_writer_nickname,
+            member_profile.attachment_no as board_writer_profile_url,
             member.member_gender as board_writer_gender,
             member.member_birth as board_writer_birth,
             member.member_mbti as board_writer_mbti,
@@ -69,6 +71,7 @@
             member.member_school as board_writer_school
         from board
         left join member on board.board_writer = member.member_no
+        left join member_profile on member.member_no = member_profile.member_no
         where board.board_no = #{boardNo}
     </select>
 
@@ -108,7 +111,7 @@
             board.board_category,
             board.board_content,
             member.member_nickname as board_writer_nickname,
-            <!--member_profile.attachment_no as board_writer_profile_url,-->
+            member_profile.attachment_no as board_writer_profile_url,
             board.board_wtime as board_write_time,
             board.board_reply,
             member.member_gender as board_writer_gender,
@@ -118,7 +121,7 @@
             member.member_school as board_writer_school
         from board
         left join member on board.board_writer = member.member_no
-        <!--left join member_profile on member.member_no = member_profile.member_no-->
+        left join member_profile on member.member_no = member_profile.member_no
         where board.board_crew_no = #{crewNo}
         order by board.board_wtime desc
     </select>
@@ -155,6 +158,7 @@
 		board.board_category,
 		board.board_content,
 		member.member_nickname as board_writer_nickname,
+		member_profile.attachment_no as board_writer_profile_url,
 		board.board_wtime as board_write_time,
 		board.board_reply,
 		member.member_gender as board_writer_gender,
@@ -164,6 +168,7 @@
 		member.member_school as board_writer_school
 		from board
 		left join member on board.board_writer = member.member_no
+		left join member_profile on member.member_no = member_profile.member_no
 		where board.board_crew_no IS NULL
 		order by board.board_wtime desc
 	</select>
@@ -175,6 +180,7 @@
 		board.board_category,
 		board.board_content, 
 		member.member_nickname as board_writer_nickname,
+		member_profile.attachment_no as board_writer_profile_url,
 		board.board_wtime as board_write_time, 
 		board.board_reply,
 		member.member_gender as board_writer_gender, 
@@ -183,7 +189,8 @@
 		member.member_location as board_writer_location, 
 		member.member_school as board_writer_school 
 		from board 
-		left join member on board.board_writer = member.member_no 
+		left join member on board.board_writer = member.member_no
+		left join member_profile on member.member_no = member_profile.member_no 
 		where board.board_crew_no IS NULL 
 		<if test="category != null">
 			and board.board_category = #{category}
