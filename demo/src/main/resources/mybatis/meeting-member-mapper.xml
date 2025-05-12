@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="meetingMember">
+
+    <!-- 시퀀스 발급 -->
+	<select id="sequence" resultType="long">
+	  SELECT meeting_member_seq.NEXTVAL FROM dual
+	</select>
+	
+	<!-- 정모 참여 등록 -->
+	<insert id="insert" parameterType="MeetingMemberDto">
+	  INSERT INTO meeting_member (
+	    meeting_member_no, meeting_no, member_no, meeting_member_join_date
+	  ) VALUES (
+	    #{meetingMemberNo}, #{meetingNo}, #{memberNo}, SYSDATE
+	  )
+	</insert>
+	
+	<!-- 정모 참여 취소 -->
+	<delete id="delete">
+	  DELETE FROM meeting_member
+	  WHERE meeting_no = #{meetingNo} AND member_no = #{memberNo}
+	</delete>
+	
+	<!-- 정모 참여자 목록 + 모임장 여부 조회 -->
+    <select id="selectMeetingMemberList" resultType="meetingMemberVO" parameterType="long">
+	    SELECT
+	        mm.member_no,
+	        m.member_nickname,
+	        mp.attachment_no,
+	        CASE 
+	            WHEN mm.member_no = mt.meeting_owner_no THEN 'Y'
+	            ELSE 'N'
+	        END AS is_leader,
+	        mm.meeting_member_join_date
+	    FROM meeting_member mm
+	    INNER JOIN member m ON mm.member_no = m.member_no
+	    LEFT JOIN member_profile mp ON m.member_no = mp.member_no
+	    INNER JOIN meeting mt ON mm.meeting_no = mt.meeting_no
+	    WHERE mm.meeting_no = #{meetingNo}
+	    ORDER BY is_leader DESC, mm.meeting_member_join_date ASC
+	</select>
+	
+	<!-- 정모 참여자 목록에 로그인한 유저가 있는지 확인 -->
+	<select id="isJoined" resultType="int">
+	  SELECT COUNT(*)
+	  FROM meeting_member
+	  WHERE meeting_no = #{meetingNo}
+	    AND member_no = #{memberNo}
+	</select>
+
+</mapper>

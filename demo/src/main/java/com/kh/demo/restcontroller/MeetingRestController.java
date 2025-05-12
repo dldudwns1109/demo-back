@@ -19,10 +19,13 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.kh.demo.dao.MeetingDao;
+import com.kh.demo.dao.MeetingMemberDao;
 import com.kh.demo.dto.AttachmentDto;
 import com.kh.demo.dto.MeetingDto;
+import com.kh.demo.dto.MeetingMemberDto;
 import com.kh.demo.service.AttachmentService;
 import com.kh.demo.service.TokenService;
+import com.kh.demo.vo.MeetingVO;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -39,6 +42,8 @@ public class MeetingRestController {
 	private AttachmentService attachmentService;
 	@Autowired
 	private TokenService tokenService;
+	@Autowired
+	private MeetingMemberDao meetingMemberDao;
 
 	// 정모 추가
 	@PostMapping(value = "/", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -62,8 +67,21 @@ public class MeetingRestController {
 	        AttachmentDto attachmentDto = attachmentService.save(attach);
 	        meetingDao.connect(meetingDto, attachmentDto);
 	    }
+	    
+	    // ✅ 정모 생성자(모임장)도 meeting_member에 참여자로 등록
+	    MeetingMemberDto meetingMemberDto = MeetingMemberDto.builder()
+	        .meetingNo(meetingNo)
+	        .memberNo(userNo)
+	        .build();
+	    meetingMemberDao.insert(meetingMemberDto);
+	    
+	    System.out.println("userNo = " + userNo);
+	    System.out.println("meetingNo = " + meetingNo);
+	    System.out.println("crewNo = " + crewNo);
+	    System.out.println("파일 유무 = " + (attach != null ? attach.getOriginalFilename() : "없음"));
 
 	    return meetingDto; // ✅ 여기가 핵심!
+	    
 	}
 
 	// 이미지 반환
@@ -94,8 +112,9 @@ public class MeetingRestController {
 
 	// 정모 상세
 	@GetMapping("/{meetingNo}")
-	public MeetingDto detail(@PathVariable Long meetingNo) {
-		MeetingDto meetingData = meetingDao.selectVO(meetingNo);
-		return meetingData;
+	public MeetingVO detail(@PathVariable Long meetingNo) {
+	    System.out.println("정모 번호: " + meetingNo);
+	    return meetingDao.selectVO(meetingNo);
 	}
+	
 }
