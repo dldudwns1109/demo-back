@@ -25,6 +25,11 @@
 		)
 	</insert>
 	
+	<delete id="deleteLike" parameterType="long">
+		delete from member_like
+		where member_no = #{memberNo}
+	</delete>
+	
 	<insert id="connect">
 	    insert into member_profile (member_no, attachment_no)
 	    values (#{memberNo}, #{attachmentNo})
@@ -105,5 +110,9 @@
 		select member_no from member
 		where member_nickname = #{memberNickname}
     </select>
+    
+    <delete id="disconnectProfile" parameterType="long">
+		delete from member_profile where member_no = #{memberNo}
+	</delete>
 
 </mapper>
