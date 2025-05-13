@@ -18,8 +18,10 @@
         where reply_origin = #{replyOrigin}
         order by reply_wtime desc
     </select>
+	
 
-    <!-- 작성 직후 댓글 조회 -->
+
+	<!-- 작성 직후 댓글 조회 -->
     <select id="selectLatestByWriter" resultType="com.kh.demo.dto.ReplyListDto">
         select * from reply_view
         where reply_writer = #{replyWriter}
@@ -28,7 +30,7 @@
         fetch first 1 rows only
     </select>
 
-    <!-- 댓글 수정 -->
+	<!-- 댓글 수정 -->
     <update id="update">
         update reply
         set reply_content = #{replyContent},
@@ -36,13 +38,13 @@
         where reply_no = #{replyNo}
     </update>
 
-    <!-- 댓글 삭제 -->
+	<!-- 댓글 삭제 -->
     <delete id="delete">
         delete from reply
         where reply_no = #{replyNo}
     </delete>
 
-    <!-- 댓글 수 증가/감소 -->
+	<!-- 댓글 수 증가/감소 -->
     <update id="updateBoardReplyUp">
         update board
         set board_reply = board_reply + 1

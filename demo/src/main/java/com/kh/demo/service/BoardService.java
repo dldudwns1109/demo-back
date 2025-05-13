@@ -40,6 +40,7 @@ public class BoardService {
 
 	// 등록
 	public void insert(BoardDto boardDto) {
+		boardDto.setBoardWriteTime(Timestamp.from(Instant.now()));
 		boardDao.insert(boardDto);
 	}
 
@@ -62,4 +63,8 @@ public class BoardService {
         return boardDao.selectJoinBoardListByCategory(category);
     }
     
+	// 특정 회원이 특정 모임에서 리더인지 여부 확인
+	public boolean isLeader(Long memberNo, Long crewNo) {
+		return boardDao.isLeader(memberNo, crewNo);
+	}
 }

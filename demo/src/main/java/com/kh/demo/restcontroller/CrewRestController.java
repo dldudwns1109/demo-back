@@ -2,7 +2,9 @@ package com.kh.demo.restcontroller;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -261,6 +263,37 @@ public class CrewRestController {
             response.sendRedirect("https://dummyimage.com/400x400/000/fff");
         }
     }
+    
+//    @GetMapping("/joined/{memberNo}")
+//    public List<CrewDto> getJoinedCrews(@PathVariable Long memberNo) {
+//        return crewDao.selectJoinedCrews(memberNo);
+//    }
+    @GetMapping("/joined/{memberNo}")
+    public List<CrewDto> getJoinedCrews(@PathVariable Long memberNo) {
+        List<CrewDto> joinedCrews = crewDao.selectJoinedCrews(memberNo);
+        
+        // 각 crew의 memberCount를 포함시켜서 반환
+        for (CrewDto crew : joinedCrews) {
+            long memberCount = crewMemberDao.getMemberCount(crew.getCrewNo());
+            crew.setMemberCount(memberCount);  // 추가된 필드
+        }
+
+        return joinedCrews;
+    }
+
+    
+
+    @GetMapping("/member-count/{crewNo}")
+    public ResponseEntity<Map<String, Long>> getMemberCount(@PathVariable long crewNo) {
+        long memberCount = crewMemberDao.getMemberCount(crewNo);
+        Map<String, Long> response = new HashMap<>();
+        response.put("memberCount", memberCount);
+        return ResponseEntity.ok(response);
+    }
+    
+    
+    
+
 }
 
 

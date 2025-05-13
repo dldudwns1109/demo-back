@@ -78,32 +78,30 @@ public class CrewMemberRestController {
 //		
 //		return crewMemberDao.isLeader(crewMemberDto);
 //	}
-	// 모임장 여부 확인
 	@GetMapping("/{crewNo}/leader")
-	public boolean leader(@PathVariable Long crewNo, @RequestHeader("Authorization") String token) {
-	    try {
-	        System.out.println("Received Token: " + token);
+	public boolean leader(@PathVariable Long crewNo, @RequestHeader(value = "Authorization", required = false) String token) {
+	    if (token == null || token.trim().isEmpty()) {
+	        throw new RuntimeException("Authorization token is missing");
+	    }
 
-	        // JWT 파싱
+	    try {
 	        long memberNo = tokenService.parseBearerToken(token);
-	        System.out.println("Parsed Member No: " + memberNo);
 
 	        CrewMemberDto crewMemberDto = CrewMemberDto.builder()
 	                .crewNo(crewNo)
 	                .memberNo(memberNo)
 	                .build();
-	        
-	        boolean isLeader = crewMemberDao.isLeader(crewMemberDto);
-	        System.out.println("Is Leader: " + isLeader);
 
-	        return isLeader;
+	        return crewMemberDao.isLeader(crewMemberDto);
 
 	    } catch (Exception e) {
 	        System.err.println("Error in leader() method: " + e.getMessage());
 	        e.printStackTrace();
-	        throw new RuntimeException("Error while checking leader status");
+	        return false;
 	    }
 	}
+
+
 
 
 

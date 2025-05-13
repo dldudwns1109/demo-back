@@ -106,5 +106,33 @@ public class BoardRestController {
 
         return vo;
     }
+	
+	// 모임별 게시글 작성
+	@PostMapping("/crew/{crewNo}/write")
+	public void writeCrewBoard(@PathVariable Long crewNo, @RequestBody BoardDto boardDto) {
+	    if (boardDto.getBoardWriter() == null || crewNo == null) {
+	        throw new TargetNotFoundException();
+	    }
+	    boardDto.setBoardCrewNo(crewNo);
+	    boardService.insert(boardDto);
+	}
+	
+	// 특정 게시글 작성자의 leader 여부 확인
+	@GetMapping("/leader/{memberNo}/{crewNo}")
+	public boolean checkLeader(@PathVariable Long memberNo, @PathVariable Long crewNo) {
+	    return boardService.isLeader(memberNo, crewNo);
+	}
+
+	
+	
 
 }
+
+
+
+
+
+
+
+
+

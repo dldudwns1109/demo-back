@@ -120,5 +120,13 @@
     <delete id="disconnectProfile" parameterType="long">
 		delete from member_profile where member_no = #{memberNo}
 	</delete>
+	
+	
+	<select id="getAttachmentNo" parameterType="long" resultType="long">
+    	SELECT attachment_no 
+    	FROM member_profile 
+    	WHERE member_no = #{memberNo}
+	</select>
+
 
 </mapper>

@@ -64,13 +64,21 @@
 		and member_no = #{memberNo}
 		and leader = 'Y'
 	</select>-->
-	<select id="isLeader" parameterType="CrewMemberDto" resultType="boolean">
+	<!--<select id="isLeader" parameterType="CrewMemberDto" resultType="boolean">
 		select
 		leader = 'Y'
 		from crew_member
 		where crew_no = #{crewNo}
 		and member_no = #{memberNo}
+	</select>-->
+	<select id="isLeader" parameterType="CrewMemberDto" resultType="boolean">
+		select
+		case when leader = 'Y' then 1 else 0 end as isLeader
+		from crew_member
+		where crew_no = #{crewNo}
+		and member_no = #{memberNo}
 	</select>
+
 
 	<!-- 모임 가입 여부 확인 -->
 	<select id="isMember" parameterType="CrewMemberDto" resultType="boolean">
@@ -123,6 +131,12 @@
 	<select id="findLiked" resultType="long">
 		select crew_no from crew_like
 		where member_id = #{memberNo}
+	</select>
+	
+	<select id="getMemberCount" parameterType="long" resultType="long">
+    	select count(*) 
+    	from crew_member 
+    	where crew_no = #{crewNo}
 	</select>
 
 </mapper>

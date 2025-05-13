@@ -9,6 +9,7 @@
     <select id="selectList" resultType="BoardVO">
         select
             board.board_no,
+            board.board_writer as board_writer,
             board.board_title,
             board.board_category,
             board.board_content,
@@ -32,6 +33,7 @@
     <select id="selectListByCategory" resultType="BoardVO">
         select
             board.board_no,
+            board.board_writer as board_writer,
             board.board_title,
             board.board_category,
             board.board_content,
@@ -76,7 +78,7 @@
     </select>
 
     <!-- 게시글 등록 -->
-    <insert id="insert">
+    <!--<insert id="insert">
         insert into board (
             board_no, board_crew_no, board_title, board_category,
             board_writer, board_wtime, board_content, board_reply
@@ -84,9 +86,23 @@
             board_seq.nextval, #{boardCrewNo}, #{boardTitle}, #{boardCategory},
             #{boardWriter}, systimestamp, #{boardContent}, 0
         )
-    </insert>
+    </insert>-->
+    <!-- 게시글 등록 -->
+	<insert id="insert" parameterType="BoardDto"> insert into board ( board_no,
+		board_crew_no, board_title, board_category, board_writer, board_wtime,
+		board_content, board_reply ) values ( board_seq.nextval, <choose>
+				<when test="boardCrewNo != null">
+					#{boardCrewNo}
+				</when>
+				<otherwise>
+					null
+				</otherwise>
+			</choose>, #{boardTitle},
+		#{boardCategory}, #{boardWriter}, systimestamp, #{boardContent}, 0 ) 
+	</insert>
 
-    <!-- 게시글 수정 -->
+
+	<!-- 게시글 수정 -->
     <update id="update">
         update board
         set
@@ -97,13 +113,13 @@
         where board_no = #{boardNo}
     </update>
 
-    <!-- 게시글 삭제 -->
+	<!-- 게시글 삭제 -->
     <delete id="delete">
         delete from board
         where board_no = #{boardNo}
     </delete>
 
-    <!-- crew_no로 게시글 목록 -->
+	<!-- crew_no로 게시글 목록 -->
     <select id="selectListByCrewNo" resultType="BoardVO">
         select
             board.board_no,
@@ -126,7 +142,7 @@
         order by board.board_wtime desc
     </select>
 
-    <!-- crew_no + category로 게시글 목록 -->
+	<!-- crew_no + category로 게시글 목록 -->
     <select id="selectListByCrewNoAndCategory" resultType="BoardVO">
         select
             board.board_no,
@@ -134,7 +150,7 @@
             board.board_category,
             board.board_content,
             member.member_nickname as board_writer_nickname,
-            <!-- member_profile.attachment_no as board_writer_profile_url,-->
+		<!-- member_profile.attachment_no as board_writer_profile_url,-->
             board.board_wtime as board_write_time,
             board.board_reply,
             member.member_gender as board_writer_gender,
@@ -144,7 +160,7 @@
             member.member_school as board_writer_school
         from board
         left join member on board.board_writer = member.member_no
-        <!--left join member_profile on member.member_no = member_profile.member_no-->
+		<!--left join member_profile on member.member_no = member_profile.member_no-->
         where board.board_crew_no = #{crewNo}
           and board.board_category = #{category}
         order by board.board_wtime desc
@@ -154,6 +170,7 @@
 	<select id="selectJoinBoardList" resultType="BoardVO">
 		select
 		board.board_no,
+		board.board_writer as board_writer,
 		board.board_title,
 		board.board_category,
 		board.board_content,
@@ -176,6 +193,7 @@
 	<!-- crew_no가 NULL인 게시글 목록 중 카테고리 필터링 -->
 	<select id="selectJoinBoardListByCategory" resultType="BoardVO"> select
 		board.board_no, 
+		board.board_writer as board_writer,
 		board.board_title, 
 		board.board_category,
 		board.board_content, 
@@ -198,4 +216,27 @@
 		order by board.board_wtime desc 
 		</select>
 
+	<!-- 특정 회원이 특정 모임에서 리더인지 여부 확인 -->
+	<select id="board.isLeader" resultType="boolean">
+		SELECT
+		CASE WHEN leader = 'Y' THEN 1 ELSE 0 END
+		FROM crew_member
+		WHERE member_no = #{memberNo} AND crew_no = #{crewNo}
+	</select>
+
+		
+		
+		
+		
+
 </mapper>
+
+
+
+
+
+
+
+
+
+

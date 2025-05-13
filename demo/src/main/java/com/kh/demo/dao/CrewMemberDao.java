@@ -33,9 +33,16 @@ public class CrewMemberDao {
     }
 
     // 해당 사용자가 모임장인지 확인
+//    public boolean isLeader(CrewMemberDto crewMemberDto) {
+//        return sqlSession.selectOne("crewmember.isLeader", crewMemberDto);
+//    }
+ // 모임장 여부 확인
     public boolean isLeader(CrewMemberDto crewMemberDto) {
-        return sqlSession.selectOne("crewmember.isLeader", crewMemberDto);
+        Boolean result = sqlSession.selectOne("crewmember.isLeader", crewMemberDto);
+        return result != null && result;
     }
+
+
 
     // 모임 가입 여부 확인
     public boolean isMember(CrewMemberDto crewMemberDto) {
@@ -63,6 +70,8 @@ public class CrewMemberDao {
     public List<Long> findLiked(long memberNo) {
     	return sqlSession.selectList("crewmember.findLiked", memberNo);
     }
-    
+    public long getMemberCount(long crewNo) {
+        return sqlSession.selectOne("crewmember.getMemberCount", crewNo);
+    }
     
 }
