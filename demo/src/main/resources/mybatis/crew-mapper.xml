@@ -129,5 +129,41 @@
         insert into crew_image (crew_no, attachment_no)
         values (#{crewNo}, #{attachmentNo})
     </insert>
+    
+   <!-- <select id="selectJoinedCrews" resultType="CrewDto">
+		select
+		c.crew_no as crewNo,
+		c.crew_name as crewName,
+		c.crew_category as crewCategory,
+		c.crew_location as crewLocation,
+		(select count(*) from crew_member where crew_no = c.crew_no) as
+		memberCount,
+		nvl(ci.attachment_no, 0) as crewImageUrl
+		from crew c
+		left join crew_image ci on c.crew_no = ci.crew_no
+		where c.crew_no in (
+		select crew_no
+		from crew_member
+		where member_no = #{memberNo}
+		)
+	</select>-->
+	
+	<select id="selectjoinedcrews" resultType="crewdto">
+		select
+		c.crew_no as crewno,
+		c.crew_name as crewname,
+		c.crew_category as crewcategory,
+		c.crew_location as crewlocation,
+		c.crew_limit as crewlimit,
+		c.crew_intro as crewintro,
+		(select count(*) from crew_member cm where cm.crew_no = c.crew_no) as
+		membercount
+		from crew c
+		where c.crew_no in (
+		select crew_no from crew_member where member_no = #{memberno}
+		)
+	</select>
+
+    
 
 </mapper>

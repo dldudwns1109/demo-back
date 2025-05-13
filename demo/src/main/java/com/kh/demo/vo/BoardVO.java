@@ -8,6 +8,7 @@ import lombok.Data;
 @Data
 public class BoardVO {
 	private Long boardNo; // 게시글 번호
+	private Long boardWriter;
 	private String boardTitle; // 게시글 제목
 	private String boardCategory; // 게시글 카테고리명
 	private String boardWriterNickname; // 작성자의 닉네임

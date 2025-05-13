@@ -118,4 +118,10 @@ public class MemberDao {
 	        }
 	    }
 	}
+	
+	public Long getAttachmentNo(Long memberNo) {
+	    return sqlSession.selectOne("member.getAttachmentNo", memberNo);
+	}
+
+	
 }

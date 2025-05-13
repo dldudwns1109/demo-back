@@ -13,4 +13,5 @@ public class CrewDto {
     private String crewLocation; // 모임 지역
     private long crewLimit; // 최대 인원 수
     private String crewIntro; // 모임 소개글
+    private long memberCount;
 }

@@ -95,4 +95,8 @@ public class CrewDao {
 	public List<CrewDto> selectGroupByNo(long crewNo) {
 		return sqlSession.selectList("crew.find", crewNo);
 	}
+	
+	 public List<CrewDto> selectJoinedCrews(Long memberNo) {
+	        return sqlSession.selectList("crew.selectjoinedcrews", memberNo);
+	    }
 }

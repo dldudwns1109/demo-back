@@ -71,4 +71,13 @@ public class BoardDao {
         param.put("category", category);
         return sqlSession.selectList("board.selectJoinBoardListByCategory", param);
     }
+    
+	// 특정 회원이 특정 모임에서 리더인지 여부 확인
+	public boolean isLeader(Long memberNo, Long crewNo) {
+		Map<String, Long> param = new HashMap<>();
+		param.put("memberNo", memberNo);
+		param.put("crewNo", crewNo);
+		return sqlSession.selectOne("board.isLeader", param);
+	}
+
 }
