@@ -38,10 +38,10 @@ public class ChatTest {
 					.chatCrewNo(null)
 					.chatRoomNo(4L)
 					.chatType("DM")
-					.chatContent("최근 메세지임.")
+					.chatContent("최근 메세지임2.")
 					.chatTime(Timestamp.valueOf(LocalDateTime.now()))
-					.chatSender(84L)
-					.chatReceiver(103L)
+					.chatSender(103L)
+					.chatReceiver(84L)
 				.build()
 			);
 	}

@@ -1,7 +1,5 @@
 package com.kh.demo.restcontroller;
 
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,7 +14,6 @@ import com.kh.demo.dao.ChatDao;
 import com.kh.demo.dao.MemberDao;
 import com.kh.demo.dto.ChatDto;
 import com.kh.demo.dto.MemberDto;
-import com.kh.demo.vo.websocket.MemberChatResponseVO;
 import com.kh.demo.vo.websocket.MemberChatRoomResponseVO;
 
 @CrossOrigin
@@ -50,6 +47,27 @@ public class ChatRestController {
 					.build()
 				);
 			}
+		}
+		
+		return list;
+	}
+	
+	@GetMapping("/messages/{roomNo}")
+	public List<MemberChatRoomResponseVO> messageList(@PathVariable long roomNo) {
+		List<MemberChatRoomResponseVO> list = new ArrayList<>();
+		for (ChatDto chatDto: chatDao.selectChatMessageList(roomNo)) {
+			long targetNo = chatDto.getChatSender();		
+			MemberDto memberDto = memberDao.findMemberByNo(targetNo);
+			
+			list.add(
+				MemberChatRoomResponseVO.builder()
+					.roomNo(roomNo)
+					.accountNo(targetNo)
+					.accountNickname(memberDto.getMemberNickname())
+					.content(chatDto.getChatContent())
+					.time(chatDto.getChatTime().toLocalDateTime())
+				.build()
+			);
 		}
 		
 		return list;

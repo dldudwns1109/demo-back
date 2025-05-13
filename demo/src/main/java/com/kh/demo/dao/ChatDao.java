@@ -29,4 +29,12 @@ public class ChatDao {
 	public List<ChatDto> selectChatList(long roomNo) {
 		return sqlSession.selectList("chat.findChatRoom", roomNo);
 	}
+	
+	public List<ChatDto> selectChatMessageList(long roomNo) {
+		return sqlSession.selectList("chat.findChatMessageList", roomNo);
+	}
+	
+	public List<Long> selectChatSender(long roomNo) {
+		return sqlSession.selectList("chat.findChatSender", roomNo);
+	}
 }

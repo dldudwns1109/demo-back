@@ -1,6 +1,9 @@
 package com.kh.demo.websocket;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
@@ -9,7 +12,9 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Controller;
 
+import com.kh.demo.dao.ChatDao;
 import com.kh.demo.dao.MemberDao;
+import com.kh.demo.dto.ChatDto;
 import com.kh.demo.dto.MemberDto;
 import com.kh.demo.service.TokenService;
 import com.kh.demo.vo.websocket.MemberChatResponseVO;
@@ -29,6 +34,9 @@ public class MemberChatController {
 	
 	@Autowired
 	private MemberDao memberDao;
+	
+	@Autowired
+	private ChatDao chatDao;
 
 	@MessageMapping("/member/chat")
 	public void memberChat(Message<MemberChatVO> message) {
@@ -54,5 +62,26 @@ public class MemberChatController {
 		
 		messagingTemplate.convertAndSend("/private/member/chat/" 
 				+ String.valueOf(vo.getTarget()), response);
+		
+		long targetNo = -1;
+		Set<Long> set = new HashSet<>(chatDao.selectChatSender(vo.getTarget()));
+		if (set.size() > 1) {
+			for (long senderNo : set) {
+				if (senderNo != memberNo) targetNo = senderNo; 
+			}
+		} else targetNo = set.iterator().next();
+		
+		// 그룹 모임 시 조건처리하여 crewNo 넣어야함
+		chatDao.insert(
+			ChatDto.builder()
+//				.chatCrewNo(null)
+				.chatRoomNo(vo.getTarget())
+				.chatType("DM")
+				.chatContent(vo.getContent())
+				.chatTime(Timestamp.valueOf(response.getTime()))
+				.chatSender(memberNo)
+				.chatReceiver(targetNo)
+			.build()
+		);
 	}
 }

@@ -33,4 +33,15 @@
 			order by chat_time desc
 		) where rownum = 1
 	</select>
+	
+	<select id="findChatMessageList" resultType="ChatDto">
+		select * from chat
+		where chat_room_no = #{chatRoomNo}
+		order by chat_time asc
+	</select>
+	
+	<select id="findChatSender" resultType="long">
+		select chat_sender from chat
+		where chat_room_no = #{chatRoomNo}
+	</select>
 </mapper>
