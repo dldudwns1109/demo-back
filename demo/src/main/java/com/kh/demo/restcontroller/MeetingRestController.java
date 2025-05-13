@@ -99,9 +99,10 @@ public class MeetingRestController {
 	}
 
 	// 정모 수정
-	@PutMapping("/")
-	public boolean update(@RequestBody MeetingDto meetingDto) {
-		return meetingDao.update(meetingDto);
+	@PutMapping("/{meetingNo}")
+	public boolean update(@PathVariable long meetingNo, @ModelAttribute MeetingDto meetingDto) {
+	    meetingDto.setMeetingNo(meetingNo);
+	    return meetingDao.update(meetingDto);
 	}
 
 	// 정모 삭제
