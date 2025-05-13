@@ -66,6 +66,12 @@
 		where member_email = #{memberEmail}
 	</update>
 	
+	<update id="updatePasswordByNo">
+		update member
+		set member_pw = #{memberPw}
+		where member_no = #{memberNo}
+	</update>
+	
 	<update id="editUnit">
 	    update member
 	    <set>

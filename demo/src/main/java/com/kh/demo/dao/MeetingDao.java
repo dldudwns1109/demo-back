@@ -1,7 +1,6 @@
 package com.kh.demo.dao;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.session.SqlSession;
@@ -10,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import com.kh.demo.dto.AttachmentDto;
 import com.kh.demo.dto.MeetingDto;
+import com.kh.demo.vo.MeetingVO;
 
 @Repository
 public class MeetingDao {
@@ -38,7 +38,7 @@ public class MeetingDao {
 	}
 
 	// 특정 정모 상세 조회
-	public MeetingDto selectVO(Long meetingNo) {
+	public MeetingVO selectVO(Long meetingNo) {
 		return sqlSession.selectOne("meeting.selectVO", meetingNo);
 	}
 

@@ -77,13 +77,37 @@ public class MemberService {
 	}
 	
 	public boolean checkPassword(MemberCheckVO memberCheckVO) {
-		MemberDto findDto = memberDao.findMemberByNo(memberCheckVO.getMemberNo());
-		if (findDto == null) return false;
-		
-		return passwordEncoder.matches(memberCheckVO.getMemberPw(), findDto.getMemberPw());
+	    MemberDto findDto = memberDao.findMemberByNo(memberCheckVO.getMemberNo());
+
+	    System.out.println("=== 비밀번호 확인 로깅 ===");
+	    System.out.println("전달된 memberNo : " + memberCheckVO.getMemberNo());
+	    System.out.println("입력한 평문 비밀번호 : " + memberCheckVO.getMemberPw());
+	    
+	    if (findDto == null) {
+	        System.out.println("해당 회원을 찾을 수 없습니다.");
+	        return false;
+	    }
+
+	    System.out.println("DB 저장된 해시 비밀번호 : " + findDto.getMemberPw());
+
+	    boolean match = passwordEncoder.matches(memberCheckVO.getMemberPw(), findDto.getMemberPw());
+	    System.out.println("비교 결과 (match): " + match);
+
+	    return match;
 	}
+	
 	public MemberDto getMemberProfile(Long memberNo) {
 		return memberDao.findMemberByNo(memberNo);
+	}
+	
+	public boolean changePassword(Long memberNo, String newPw) {
+	    MemberDto findDto = memberDao.findMemberByNo(memberNo);
+	    if (findDto == null) return false;
+
+	    String encodedPw = passwordEncoder.encode(newPw);
+	    findDto.setMemberPw(encodedPw);
+
+	    return memberDao.updatePasswordByNo(findDto); // 새로 만든 쿼리 사용
 	}
 	
 }

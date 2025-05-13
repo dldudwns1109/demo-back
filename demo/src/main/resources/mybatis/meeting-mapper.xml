@@ -63,22 +63,23 @@
     </insert>
     
     <!-- 특정 정모 상세 조회 -->
-    <select id="selectVO" resultType="meetingVO" parameterType="long">
+    <select id="selectVO" resultType="MeetingVO" parameterType="long">
 	    SELECT
-	        m.meeting_no,
-	        m.meeting_crew_no,
-	        m.meeting_owner_id,
-	        m.meeting_name,
-	        m.meeting_date,
-	        m.meeting_location,
-	        m.meeting_price,
-	        m.meeting_limit,
-	        mi.attachment_no
+	        m.meeting_no AS meetingNo,
+	        m.meeting_crew_no AS meetingCrewNo,
+	        m.meeting_owner_no AS meetingOwnerNo,
+	        m.meeting_name AS meetingName,
+	        m.meeting_date AS meetingDate,
+	        m.meeting_location AS meetingLocation,
+	        m.meeting_price AS meetingPrice,
+	        m.meeting_limit AS meetingLimit,
+	        m.meeting_create AS meetingCreate,
+	        mi.attachment_no AS attachmentNo
 	    FROM meeting m
 	    LEFT JOIN meeting_image mi ON m.meeting_no = mi.meeting_no
 	    WHERE m.meeting_no = #{meetingNo}
 	</select>
-    
+
      <!-- 전체 정모 목록 조회 -->
 <!--    <select id="selectList" resultType="meetingDto">-->
 <!--        select-->

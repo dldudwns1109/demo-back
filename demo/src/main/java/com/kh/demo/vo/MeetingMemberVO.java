@@ -6,10 +6,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MemberCheckVO {
-	private long memberNo;
-	private String memberPw;
+@Builder
+public class MeetingMemberVO {
+    private Long memberNo;
+    private String memberNickname;
+    private Long attachmentNo;
+    private String isLeader; // 모임장 여부
 }
+
