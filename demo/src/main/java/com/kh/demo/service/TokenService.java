@@ -66,7 +66,7 @@ public class TokenService {
 									.verifyWith(tokenProperties.getKey())
 									.requireIssuer(tokenProperties.getIssuer())
 									.build()
-									.parse(token)
+									.parse(token.trim())
 									.getPayload();
 		
 		return ((Integer) claims.get("memberNo")).longValue();
@@ -76,21 +76,21 @@ public class TokenService {
 	
 
 	
-	public long parseBearerToken(String bearerToken) {
-		if (bearerToken == null || !bearerToken.startsWith("Bearer ")) 
-			throw new RuntimeException();
-		
-		return parse(bearerToken.substring(7));
-	}
-	
 //	public long parseBearerToken(String bearerToken) {
-//	    if (bearerToken == null || !bearerToken.startsWith("Bearer ")) {
-//	        throw new RuntimeException("유효하지 않은 토큰 형식입니다.");
-//	    }
-//
-//	    String token = bearerToken.substring(7);
-//	    return parse(token);
+//		if (bearerToken == null || !bearerToken.startsWith("Bearer ")) 
+//			throw new RuntimeException();
+//		
+//		return parse(bearerToken.substring(7));
 //	}
+	
+	public long parseBearerToken(String bearerToken) {
+	    if (bearerToken == null || !bearerToken.startsWith("Bearer ")) {
+	        throw new RuntimeException();
+	    }
+
+	    String token = bearerToken.substring(7).trim();
+	    return parse(token);
+	}
 	
 	
 	

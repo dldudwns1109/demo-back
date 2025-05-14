@@ -64,20 +64,33 @@ public class BoardDao {
 	public List<BoardVO> selectJoinBoardList() {
 		return sqlSession.selectList("board.selectJoinBoardList");
 	}
-	
+
 	// crew_no가 NULL인 게시글 목록 중 카테고리 필터링
-    public List<BoardVO> selectJoinBoardListByCategory(String category) {
-        Map<String, Object> param = new HashMap<>();
-        param.put("category", category);
-        return sqlSession.selectList("board.selectJoinBoardListByCategory", param);
-    }
-    
+	public List<BoardVO> selectJoinBoardListByCategory(String category) {
+		Map<String, Object> param = new HashMap<>();
+		param.put("category", category);
+		return sqlSession.selectList("board.selectJoinBoardListByCategory", param);
+	}
+
 	// 특정 회원이 특정 모임에서 리더인지 여부 확인
 	public boolean isLeader(Long memberNo, Long crewNo) {
 		Map<String, Long> param = new HashMap<>();
 		param.put("memberNo", memberNo);
 		param.put("crewNo", crewNo);
 		return sqlSession.selectOne("board.isLeader", param);
+	}
+
+	// 특정 회원의 모든 게시글 삭제
+	public void deleteByWriter(Long memberNo) {
+		sqlSession.delete("board.deleteByWriter", memberNo);
+	}
+
+	// 특정 모임에서 특정 회원이 작성한 게시글 삭제
+	public void deleteByCrewAndWriter(Long crewNo, Long memberNo) {
+		Map<String, Long> params = new HashMap<>();
+		params.put("crewNo", crewNo);
+		params.put("memberNo", memberNo);
+		sqlSession.delete("board.deleteByCrewAndWriter", params);
 	}
 
 }

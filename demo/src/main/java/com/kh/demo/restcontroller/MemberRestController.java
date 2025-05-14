@@ -28,6 +28,7 @@ import com.kh.demo.dao.TokenDao;
 import com.kh.demo.dto.MemberDto;
 import com.kh.demo.dto.MemberLikeDto;
 import com.kh.demo.service.AttachmentService;
+import com.kh.demo.service.BoardService;
 import com.kh.demo.service.MemberService;
 import com.kh.demo.service.TokenService;
 import com.kh.demo.vo.MemberCheckVO;
@@ -58,6 +59,9 @@ public class MemberRestController {
 	
 	@Autowired
 	private AttachmentService attachmentService;
+	
+	@Autowired
+	private BoardService boardService; 
 	
 	@PostMapping("/signup")
 	public void signup(@ModelAttribute MemberVO memberVO, 
@@ -201,6 +205,9 @@ public class MemberRestController {
 			@PathVariable long memberNo) {
 	    MemberDto findDto = memberDao.findMemberByNo(memberNo);
 	    if (findDto == null) throw new RuntimeException("회원이 존재하지 않습니다");
+	    
+	    boardService.deleteByWriter(memberNo);
+	    
 	    memberDao.deleteMember(findDto.getMemberNo());
 	    
 	    long findNo = tokenService.parseBearerToken(accessToken);
@@ -218,23 +225,42 @@ public class MemberRestController {
         
         return memberVO;
     }
-		
-	
 	@GetMapping("/image/{memberNo}")
-	public void showImage(@PathVariable long memberNo,
-	                      HttpServletRequest request,
-	                      HttpServletResponse response) throws IOException {
+	public void showImage(@PathVariable long memberNo, HttpServletResponse response) throws IOException {
 	    try {
 	        System.out.println("Requested Member No: " + memberNo);
-	        long attachmentNo = memberDao.findImage(memberNo);
+	        Long attachmentNo = memberDao.findImage(memberNo);
 	        System.out.println("Attachment No Found: " + attachmentNo);
-	        String contextPath = request.getContextPath();
-	        response.sendRedirect(contextPath + "/api/attachment/" + attachmentNo);
+
+	        if (attachmentNo != null) {
+	            response.sendRedirect("/api/attachment/" + attachmentNo);
+	        } else {
+	            response.sendRedirect("/images/default-profile.png");
+	        }
+
 	    } catch (Exception e) {
 	        e.printStackTrace();
-	        response.sendRedirect("https://dummyimage.com/400x400/000/fff");
+	        response.sendRedirect("/images/default-profile.png");
 	    }
 	}
+
+		
+	
+//	@GetMapping("/image/{memberNo}")
+//	public void showImage(@PathVariable long memberNo,
+//	                      HttpServletRequest request,
+//	                      HttpServletResponse response) throws IOException {
+//	    try {
+//	        System.out.println("Requested Member No: " + memberNo);
+//	        long attachmentNo = memberDao.findImage(memberNo);
+//	        System.out.println("Attachment No Found: " + attachmentNo);
+//	        String contextPath = request.getContextPath();
+//	        response.sendRedirect(contextPath + "/api/attachment/" + attachmentNo);
+//	    } catch (Exception e) {
+//	        e.printStackTrace();
+//	        response.sendRedirect("https://dummyimage.com/400x400/000/fff");
+//	    }
+//	}
 //	@GetMapping("/image/{attachmentNo}")
 //	public void showImage(@PathVariable long memberNo,
 //	                      HttpServletRequest request,

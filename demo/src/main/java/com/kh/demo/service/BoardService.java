@@ -67,4 +67,15 @@ public class BoardService {
 	public boolean isLeader(Long memberNo, Long crewNo) {
 		return boardDao.isLeader(memberNo, crewNo);
 	}
+	
+	// 특정 회원의 모든 게시글 삭제
+    public void deleteByWriter(Long memberNo) {
+        boardDao.deleteByWriter(memberNo);
+    }
+    
+ // 특정 모임에서 특정 회원이 작성한 게시글 삭제
+    public void deleteByCrewAndWriter(Long crewNo, Long memberNo) {
+        boardDao.deleteByCrewAndWriter(crewNo, memberNo);
+    }
+
 }

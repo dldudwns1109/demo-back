@@ -14,6 +14,7 @@ public class CrewMemberVO {
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
 	private String joinDate; //가입일
 	private String leader; //모임장 여부
+//	private String joinMessage;
 	private String nickname; // 닉네임
 //	private String profile;  // 프로필 이미지 경로
 	private String birth;
