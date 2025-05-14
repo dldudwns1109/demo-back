@@ -13,9 +13,15 @@
 	<!-- 정모 참여 등록 -->
 	<insert id="insert" parameterType="MeetingMemberDto">
 	  INSERT INTO meeting_member (
-	    meeting_member_no, meeting_no, member_no, meeting_member_join_date
+	    meeting_member_no,
+	    meeting_no,
+	    member_no,
+	    is_leader
 	  ) VALUES (
-	    #{meetingMemberNo}, #{meetingNo}, #{memberNo}, SYSDATE
+	    #{meetingMemberNo},
+	    #{meetingNo},
+	    #{memberNo},
+	    #{isLeader}
 	  )
 	</insert>
 	
@@ -26,23 +32,21 @@
 	</delete>
 	
 	<!-- 정모 참여자 목록 + 모임장 여부 조회 -->
-    <select id="selectMeetingMemberList" resultType="meetingMemberVO" parameterType="long">
-	    SELECT
-	        mm.member_no,
-	        m.member_nickname,
-	        mp.attachment_no,
-	        CASE 
-	            WHEN mm.member_no = mt.meeting_owner_no THEN 'Y'
-	            ELSE 'N'
-	        END AS is_leader,
-	        mm.meeting_member_join_date
-	    FROM meeting_member mm
-	    INNER JOIN member m ON mm.member_no = m.member_no
-	    LEFT JOIN member_profile mp ON m.member_no = mp.member_no
-	    INNER JOIN meeting mt ON mm.meeting_no = mt.meeting_no
-	    WHERE mm.meeting_no = #{meetingNo}
-	    ORDER BY is_leader DESC, mm.meeting_member_join_date ASC
+    <select id="selectListByMeetingNo" resultType="MeetingMemberVO">
+	  SELECT
+	    m.member_no,
+	    m.member_nickname,
+	    mp.attachment_no AS attachment_no,
+	    mm.is_leader
+	  FROM meeting_member mm
+	  JOIN member m ON mm.member_no = m.member_no
+	  LEFT JOIN member_profile mp ON m.member_no = mp.member_no
+	  WHERE mm.meeting_no = #{meetingNo}
+	  ORDER BY 
+	    CASE WHEN mm.is_leader = 'Y' THEN 0 ELSE 1 END, 
+	    mm.meeting_member_join_date 
 	</select>
+
 	
 	<!-- 정모 참여자 목록에 로그인한 유저가 있는지 확인 -->
 	<select id="isJoined" resultType="int">
@@ -51,5 +55,16 @@
 	  WHERE meeting_no = #{meetingNo}
 	    AND member_no = #{memberNo}
 	</select>
+	
+	<!-- 정모 모임장 위임 -->
+	<update id="updateLeaderStatus">
+	    UPDATE meeting_member
+	    SET is_leader = CASE
+	        WHEN member_no = #{newOwnerNo} THEN 'Y'
+	        ELSE 'N'
+	    END
+	    WHERE meeting_no = #{meetingNo}
+	</update>
+
 
 </mapper>

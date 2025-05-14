@@ -16,4 +16,5 @@ public class MeetingMemberDto {
     private Long meetingNo;
     private Long memberNo;
     private Timestamp meetingMemberJoinDate;
+    private String isLeader;
 }

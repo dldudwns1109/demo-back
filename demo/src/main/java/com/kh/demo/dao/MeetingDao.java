@@ -1,6 +1,7 @@
 package com.kh.demo.dao;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.session.SqlSession;
@@ -42,11 +43,6 @@ public class MeetingDao {
 		return sqlSession.selectOne("meeting.selectVO", meetingNo);
 	}
 
-	// 전체 정모 목록 조회
-//	public List<MeetingDto> selectList(){
-//		return sqlSession.selectList("meeting.selectList");
-//	}
-
 	// 이미지 연결
 	public void connect(MeetingDto meetingDto, AttachmentDto attachmentDto) {
 		Map<String, Object> params = new HashMap<>();
@@ -66,4 +62,18 @@ public class MeetingDao {
 	public long findImage(long meetingNo) {
 		return sqlSession.selectOne("meeting.findImage", meetingNo);
 	}
+	
+	//정모 목록 조회 특정 crewNo
+	public List<MeetingVO> selectListByCrew(long crewNo) {
+	    return sqlSession.selectList("meeting.selectListByCrew", crewNo);
+	}
+	
+	//정모 모임장 위임
+	public boolean updateOwner(long meetingNo, long newOwnerNo) {
+	    Map<String, Object> params = new HashMap<>();
+	    params.put("meetingNo", meetingNo);
+	    params.put("newOwnerNo", newOwnerNo);
+	    return sqlSession.update("meeting.updateOwner", params) > 0;
+	}
+
 }
