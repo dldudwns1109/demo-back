@@ -123,21 +123,25 @@
     <select id="selectListByCrewNo" resultType="BoardVO">
         select
             board.board_no,
+            board.board_writer,
             board.board_title,
             board.board_category,
             board.board_content,
             member.member_nickname as board_writer_nickname,
-            member_profile.attachment_no as board_writer_profile_url,
+            <!--member_profile.attachment_no as board_writer_profile_url,-->
+            nvl(member_profile.attachment_no, 0) as board_writer_profile_url,
             board.board_wtime as board_write_time,
             board.board_reply,
             member.member_gender as board_writer_gender,
             member.member_birth as board_writer_birth,
             member.member_mbti as board_writer_mbti,
             member.member_location as board_writer_location,
-            member.member_school as board_writer_school
+            member.member_school as board_writer_school,
+            cm.leader as is_leader
         from board
         left join member on board.board_writer = member.member_no
         left join member_profile on member.member_no = member_profile.member_no
+        left join crew_member cm on cm.member_no = board.board_writer and cm.crew_no = board.board_crew_no
         where board.board_crew_no = #{crewNo}
         order by board.board_wtime desc
     </select>
@@ -146,23 +150,31 @@
     <select id="selectListByCrewNoAndCategory" resultType="BoardVO">
         select
             board.board_no,
+            board.board_writer,
             board.board_title,
             board.board_category,
             board.board_content,
             member.member_nickname as board_writer_nickname,
 		<!-- member_profile.attachment_no as board_writer_profile_url,-->
+			nvl(member_profile.attachment_no, 0) as board_writer_profile_url,
             board.board_wtime as board_write_time,
             board.board_reply,
             member.member_gender as board_writer_gender,
             member.member_birth as board_writer_birth,
             member.member_mbti as board_writer_mbti,
             member.member_location as board_writer_location,
-            member.member_school as board_writer_school
+            member.member_school as board_writer_school,
+            cm.leader as is_leader
         from board
         left join member on board.board_writer = member.member_no
-		<!--left join member_profile on member.member_no = member_profile.member_no-->
+		left join member_profile on member.member_no = member_profile.member_no
+		left join crew_member cm on cm.member_no = board.board_writer 
+                                   and cm.crew_no = board.board_crew_no
         where board.board_crew_no = #{crewNo}
+          <!--and board.board_category = #{category}-->
+        <if test="category != null">
           and board.board_category = #{category}
+        </if>
         order by board.board_wtime desc
     </select>
 
@@ -224,7 +236,18 @@
 		WHERE member_no = #{memberNo} AND crew_no = #{crewNo}
 	</select>
 
-		
+	<delete id="deleteByWriter">
+    	delete from board where board_writer = #{memberNo}
+	</delete>
+	
+	<!-- 특정 모임에서 특정 회원이 작성한 게시글 삭제 -->
+	<delete id="deleteByCrewAndWriter">
+		delete from board
+		where board_crew_no = #{crewNo}
+		and board_writer = #{memberNo}
+	</delete>
+
+
 		
 		
 		

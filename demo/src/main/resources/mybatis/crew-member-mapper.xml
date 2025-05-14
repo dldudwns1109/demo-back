@@ -50,7 +50,7 @@
 
 	<!-- 모임 탈퇴 처리  -->
 	<delete id="leave" parameterType="CrewMemberDto">
-		update crew_member
+		delete from crew_member
 		where crew_no = #{crewNo}
 		and member_no = #{memberNo}
 	</delete>
@@ -96,6 +96,7 @@
 		crew_member.member_no as memberNo,
 		crew_member.join_date as joinDate,
 		crew_member.leader as leader,
+		<!--crew_member.join_message as joinMessage,-->
 		member.member_nickname as nickname,
 		member.member_birth as birth,
 		member.member_mbti as mbti,
