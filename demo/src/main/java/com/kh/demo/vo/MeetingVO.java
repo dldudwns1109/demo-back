@@ -22,4 +22,5 @@ public class MeetingVO {
 	private Long meetingLimit; //정모 최대 인원 수
 	private Timestamp meetingCreate; //정모 생성 시각
     private Long attachmentNo; // 정모 대표 이미지 번호
+    private Long memberCount; //정모 참여 인원수
 }
