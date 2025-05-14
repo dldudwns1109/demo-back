@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class MemberChatResponseVO {
 	private Long messageNo;
+	private Long targetNo;
 	private Long accountNo;
 	private String accountNickname;
 	private String content;
