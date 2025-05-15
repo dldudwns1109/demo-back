@@ -15,8 +15,10 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Controller;
 
 import com.kh.demo.dao.ChatDao;
+import com.kh.demo.dao.ChatReadDao;
 import com.kh.demo.dao.MemberDao;
 import com.kh.demo.dto.ChatDto;
+import com.kh.demo.dto.ChatReadDto;
 import com.kh.demo.dto.MemberDto;
 import com.kh.demo.service.TokenService;
 import com.kh.demo.vo.websocket.MemberChatResponseVO;
@@ -40,6 +42,9 @@ public class MemberChatController {
 	
 	@Autowired
 	private ChatDao chatDao;
+	
+	@Autowired
+	private ChatReadDao chatReadDao;
 	
 	@MessageMapping("/member/room")
 	public void memberRoom(Message<?> message) {
@@ -71,6 +76,22 @@ public class MemberChatController {
 		
 		messagingTemplate.convertAndSend("/private/member/rooms/" 
 				+ memberNo, list);
+	}
+	
+	@MessageMapping("/member/read")
+	public void memberRead(Message<MemberChatVO> message) {
+		StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
+		String accessToken = accessor.getFirstNativeHeader("accessToken");
+		
+		if (accessToken == null || !accessToken.startsWith("Bearer ")) return;
+		long memberNo = tokenService.parseBearerToken(accessToken);
+		
+		chatReadDao.delete(
+			ChatReadDto.builder()
+				.chatRoomNo(message.getPayload().getTarget())
+				.unreadMemberNo(memberNo)
+			.build()
+		);
 	}
 
 	@MessageMapping("/member/chat")
@@ -107,9 +128,11 @@ public class MemberChatController {
 			}
 		} else targetNo = set.iterator().next();
 		
+		long chatNo = chatDao.sequence();
 		// 그룹 모임 시 조건처리하여 crewNo 넣어야함
 		chatDao.insert(
 			ChatDto.builder()
+				.chatNo(chatNo)
 //				.chatCrewNo(null)
 				.chatRoomNo(vo.getTarget())
 				.chatType("DM")
@@ -117,6 +140,14 @@ public class MemberChatController {
 				.chatTime(Timestamp.valueOf(response.getTime()))
 				.chatSender(memberNo)
 				.chatReceiver(targetNo)
+			.build()
+		);
+		
+		chatReadDao.insert(
+			ChatReadDto.builder()
+				.chatNo(chatNo)
+				.chatRoomNo(vo.getTarget())
+				.unreadMemberNo(targetNo)
 			.build()
 		);
 	}

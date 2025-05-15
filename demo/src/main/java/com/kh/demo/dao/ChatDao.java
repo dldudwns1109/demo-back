@@ -14,6 +14,10 @@ public class ChatDao {
 	@Autowired
 	private SqlSession sqlSession;
 	
+	public long sequence() {
+		return sqlSession.selectOne("chat.chatSequence", Long.class);
+	}
+	
 	public long roomSequence() {
 		return sqlSession.selectOne("chat.roomSequence", Long.class);
 	}
