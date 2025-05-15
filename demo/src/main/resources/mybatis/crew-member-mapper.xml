@@ -139,5 +139,13 @@
     	from crew_member 
     	where crew_no = #{crewNo}
 	</select>
-
+	
+	<!-- 모임장 memberNo 조회 -->
+	<select id="findLeaderMemberNo" resultType="long">
+		select member_no
+		from crew_member
+		where crew_no = #{crewNo}
+		and leader = 'Y'
+	</select>
+	
 </mapper>

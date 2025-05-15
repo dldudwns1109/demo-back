@@ -127,6 +127,11 @@
     	FROM member_profile 
     	WHERE member_no = #{memberNo}
 	</select>
-
+	
+	<select id="findNicknameById" resultType="string">
+	    SELECT member_nickname
+	    FROM member
+	    WHERE member_no = #{memberNo}
+	</select>
 
 </mapper>

@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,12 +16,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kh.demo.dao.CrewMemberDao;
-import com.kh.demo.dao.MemberDao;
+import com.kh.demo.dto.CrewJoinRequestDto;
 import com.kh.demo.dto.CrewMemberDto;
 import com.kh.demo.error.TargetNotFoundException;
 import com.kh.demo.service.BoardService;
 import com.kh.demo.service.TokenService;
 import com.kh.demo.vo.CrewMemberVO;
+import com.kh.demo.websocket.MemberChatController;
 
 @CrossOrigin
 @RestController
@@ -30,11 +32,12 @@ public class CrewMemberRestController {
 	@Autowired
 	private CrewMemberDao crewMemberDao;
 	@Autowired
-	private MemberDao memberDao;
-	@Autowired
 	private TokenService tokenService;
 	@Autowired
 	private BoardService boardService;
+	@Autowired
+	private MemberChatController memberChatController;
+	
 
 	// 모임 가입 처리
 //	@PostMapping("/{crewNo}/join")
@@ -57,20 +60,44 @@ public class CrewMemberRestController {
 //	    crewMemberDao.join(crewMemberDto);
 //	}
 
+//	@PostMapping("/{crewNo}/join")
+//	public void join(@PathVariable Long crewNo, @RequestHeader("Authorization") String authorizationHeader) {
+//
+//		System.out.println("Authorization Header: " + authorizationHeader); // 로그 추가
+//
+//		long memberNo = tokenService.parseBearerToken(authorizationHeader);
+//
+//		long crewMemberNo = crewMemberDao.sequence();
+//
+//		CrewMemberDto crewMemberDto = CrewMemberDto.builder().crewMemberNo(crewMemberNo).crewNo(crewNo)
+//				.memberNo(memberNo).leader("N").joinDate(LocalDate.now().toString()).build();
+//
+//		crewMemberDao.join(crewMemberDto);
+//	}
+	
+	@Transactional
 	@PostMapping("/{crewNo}/join")
-	public void join(@PathVariable Long crewNo, @RequestHeader("Authorization") String authorizationHeader) {
+	public void join(@PathVariable Long crewNo,
+	                 @RequestHeader("Authorization") String authorizationHeader,
+	                 @RequestBody CrewJoinRequestDto requestDto) {
+	    long memberNo = tokenService.parseBearerToken(authorizationHeader);
+	    String chatContent = requestDto.getChatContent();
 
-		System.out.println("Authorization Header: " + authorizationHeader); // 로그 추가
+	    // 1. DB에만 가입 처리
+	    long crewMemberNo = crewMemberDao.sequence();
+	    CrewMemberDto crewMemberDto = CrewMemberDto.builder()
+	            .crewMemberNo(crewMemberNo)
+	            .crewNo(crewNo)
+	            .memberNo(memberNo)
+	            .leader("N")
+	            .joinDate(LocalDate.now().toString())
+	            .build();
+	    crewMemberDao.join(crewMemberDto);
 
-		long memberNo = tokenService.parseBearerToken(authorizationHeader);
-
-		long crewMemberNo = crewMemberDao.sequence();
-
-		CrewMemberDto crewMemberDto = CrewMemberDto.builder().crewMemberNo(crewMemberNo).crewNo(crewNo)
-				.memberNo(memberNo).leader("N").joinDate(LocalDate.now().toString()).build();
-
-		crewMemberDao.join(crewMemberDto);
+	    // 2. 채팅 메시지 전송은 WebSocket 컨트롤러에 위임
+	    memberChatController.sendJoinWelcomeMessage(crewNo, memberNo, chatContent);
 	}
+
 
 	// 모임 탈퇴 처리
 //	@DeleteMapping("/{crewNo}/leave")
