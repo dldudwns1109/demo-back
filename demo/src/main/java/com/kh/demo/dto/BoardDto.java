@@ -25,4 +25,6 @@ public class BoardDto {
 	private String boardWriterMbti; //작성자 mbti
 	private String boardWriterLocation; //작성자 사는지역
 	private String boardWriterSchool; //작성자 학교
+	
+	private String isLeader;
 }

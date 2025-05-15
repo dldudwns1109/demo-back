@@ -29,6 +29,7 @@ import com.kh.demo.dao.MemberDao;
 import com.kh.demo.dto.AttachmentDto;
 import com.kh.demo.dto.CrewDto;
 import com.kh.demo.dto.CrewLikeDto;
+import com.kh.demo.error.TargetNotFoundException;
 import com.kh.demo.service.AttachmentService;
 import com.kh.demo.vo.CrewDetailVO;
 import com.kh.demo.vo.CrewVO;
@@ -238,11 +239,26 @@ public class CrewRestController {
     }
 
     // 모임 수정
-    @PutMapping("/")
-    public boolean update(@RequestBody CrewDto crewDto) {
+//    @PutMapping("/")
+//    public boolean update(@RequestBody CrewDto crewDto) {
+//        return crewDao.update(crewDto);
+//    }
+    
+    @PutMapping("/{crewNo}")
+    public boolean update(@PathVariable Long crewNo, @RequestBody CrewDto crewDto) {
+        CrewDto existingCrew = crewDao.selectOne(crewNo);
+
+        if (existingCrew == null) {
+            throw new TargetNotFoundException("해당 모임이 존재하지 않습니다.");
+        }
+
+        crewDto.setCrewNo(crewNo);
         return crewDao.update(crewDto);
     }
-	
+
+
+    
+    
 	//모임 삭제
 	@DeleteMapping("/{crewNo}")
 	public boolean delete(@PathVariable Long crewNo) {

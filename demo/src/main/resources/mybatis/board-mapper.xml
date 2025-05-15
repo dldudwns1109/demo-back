@@ -70,10 +70,13 @@
             member.member_birth as board_writer_birth,
             member.member_mbti as board_writer_mbti,
             member.member_location as board_writer_location,
-            member.member_school as board_writer_school
+            member.member_school as board_writer_school,
+            cm.leader as is_leader
         from board
         left join member on board.board_writer = member.member_no
         left join member_profile on member.member_no = member_profile.member_no
+        left join crew_member cm on cm.member_no = board.board_writer 
+                            and cm.crew_no = board.board_crew_no
         where board.board_no = #{boardNo}
     </select>
 

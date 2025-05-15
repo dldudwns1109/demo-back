@@ -108,7 +108,7 @@
         SET crew_name = #{crewName},
             crew_category = #{crewCategory},
             crew_location = #{crewLocation},
-            crew_limit = #{crewLimit},
+            <!--crew_limit = #{crewLimit},-->
             crew_intro = #{crewIntro}
         WHERE crew_no = #{crewNo}
     </update>
