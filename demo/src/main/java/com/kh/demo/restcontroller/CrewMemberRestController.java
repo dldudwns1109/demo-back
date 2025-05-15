@@ -1,9 +1,11 @@
 package com.kh.demo.restcontroller;
 
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,8 +16,11 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.kh.demo.dao.ChatDao;
 import com.kh.demo.dao.CrewMemberDao;
 import com.kh.demo.dao.MemberDao;
+import com.kh.demo.dto.ChatDto;
+import com.kh.demo.dto.CrewJoinRequestDto;
 import com.kh.demo.dto.CrewMemberDto;
 import com.kh.demo.error.TargetNotFoundException;
 import com.kh.demo.service.BoardService;
@@ -35,6 +40,8 @@ public class CrewMemberRestController {
 	private TokenService tokenService;
 	@Autowired
 	private BoardService boardService;
+	@Autowired
+	private ChatDao chatDao;
 
 	// 모임 가입 처리
 //	@PostMapping("/{crewNo}/join")
@@ -57,19 +64,84 @@ public class CrewMemberRestController {
 //	    crewMemberDao.join(crewMemberDto);
 //	}
 
+//	@PostMapping("/{crewNo}/join")
+//	public void join(@PathVariable Long crewNo, @RequestHeader("Authorization") String authorizationHeader) {
+//
+//		System.out.println("Authorization Header: " + authorizationHeader); // 로그 추가
+//
+//		long memberNo = tokenService.parseBearerToken(authorizationHeader);
+//
+//		long crewMemberNo = crewMemberDao.sequence();
+//
+//		CrewMemberDto crewMemberDto = CrewMemberDto.builder().crewMemberNo(crewMemberNo).crewNo(crewNo)
+//				.memberNo(memberNo).leader("N").joinDate(LocalDate.now().toString()).build();
+//
+//		crewMemberDao.join(crewMemberDto);
+//	}
+	
+	@Transactional
 	@PostMapping("/{crewNo}/join")
-	public void join(@PathVariable Long crewNo, @RequestHeader("Authorization") String authorizationHeader) {
+	public void join(
+	    @PathVariable Long crewNo,
+	    @RequestHeader("Authorization") String authorizationHeader,
+	    @RequestBody CrewJoinRequestDto requestDto
+	) {
+	    // 1. 사용자 정보 추출
+	    long memberNo = tokenService.parseBearerToken(authorizationHeader);
+	    String chatContent = requestDto.getChatContent();
 
-		System.out.println("Authorization Header: " + authorizationHeader); // 로그 추가
+	    // 2. crew_member 테이블에 가입 등록
+	    long crewMemberNo = crewMemberDao.sequence();
+	    CrewMemberDto crewMemberDto = CrewMemberDto.builder()
+	        .crewMemberNo(crewMemberNo)
+	        .crewNo(crewNo)
+	        .memberNo(memberNo)
+	        .leader("N")
+	        .joinDate(LocalDate.now().toString())
+	        .build();
+	    crewMemberDao.join(crewMemberDto);
 
-		long memberNo = tokenService.parseBearerToken(authorizationHeader);
+	    // 3. 사용자 닉네임 조회
+	    String memberName = memberDao.findNicknameById(memberNo); // ← DAO에 추가 필요
 
-		long crewMemberNo = crewMemberDao.sequence();
+	    // 4. 모임 채팅방 번호 조회
+	    Long crewChatRoomNo = chatDao.findRoomByCrewNo(crewNo);
 
-		CrewMemberDto crewMemberDto = CrewMemberDto.builder().crewMemberNo(crewMemberNo).crewNo(crewNo)
-				.memberNo(memberNo).leader("N").joinDate(LocalDate.now().toString()).build();
+	    // 5. 모임 채팅방에 시스템 메시지 전송
+	    if (crewChatRoomNo != null) {
+	    	chatDao.insert(ChatDto.builder()
+		    	.chatRoomNo(crewChatRoomNo)
+		    	.chatCrewNo(crewNo)
+		    	.chatType("SYSTEM")
+		    	.chatContent(memberName + "님이 들어오셨습니다.\n" + chatContent)
+		    	.chatTime(new Timestamp(System.currentTimeMillis()))
+		    	.chatSender(memberNo)
+		    	.build());
+	    }
 
-		crewMemberDao.join(crewMemberDto);
+	    // 6. 모임장 번호 조회
+	    Long leaderNo = crewMemberDao.findLeaderMemberNo(crewNo);
+
+	    if (leaderNo != null && leaderNo != memberNo) {
+	        // 7. 1:1 채팅방 존재 여부 확인
+	        Long dmRoomNo = chatDao.findDmRoom(memberNo, leaderNo);
+
+	        // 8. 없으면 채팅방 새로 생성
+	        if (dmRoomNo == null) {
+	            dmRoomNo = chatDao.roomSequence();
+	        }
+
+	        // 9. 모임장에게 DM 전송
+	        chatDao.insert(ChatDto.builder()
+	            .chatRoomNo(dmRoomNo)
+	            .chatType("DM")
+	            .chatContent(memberName + "님이 모임에 가입했습니다.\n가입인사: " + chatContent)
+	            .chatTime(new Timestamp(System.currentTimeMillis()))
+	            .chatSender(memberNo)
+	            .chatReceiver(leaderNo)
+	            .build()
+	        );
+	    }
 	}
 
 	// 모임 탈퇴 처리

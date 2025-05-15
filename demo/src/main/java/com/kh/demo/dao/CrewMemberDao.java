@@ -36,7 +36,7 @@ public class CrewMemberDao {
 //    public boolean isLeader(CrewMemberDto crewMemberDto) {
 //        return sqlSession.selectOne("crewmember.isLeader", crewMemberDto);
 //    }
- // 모임장 여부 확인
+    // 모임장 여부 확인
     public boolean isLeader(CrewMemberDto crewMemberDto) {
         Boolean result = sqlSession.selectOne("crewmember.isLeader", crewMemberDto);
         return result != null && result;
@@ -74,5 +74,9 @@ public class CrewMemberDao {
         return sqlSession.selectOne("crewmember.getMemberCount", crewNo);
     }
     
+    //모임장 조회
+    public long findLeaderMemberNo(long crewNo) {
+    	return sqlSession.selectOne("crewmember.findLeaderMemberNo", crewNo);
+    }
     
 }

@@ -1,6 +1,8 @@
 package com.kh.demo.dao;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,5 +38,16 @@ public class ChatDao {
 	
 	public List<Long> selectChatSender(long roomNo) {
 		return sqlSession.selectList("chat.findChatSender", roomNo);
+	}
+	
+	public long findRoomByCrewNo(long crewNo) {
+	    return sqlSession.selectOne("chat.findRoomByCrewNo", crewNo);
+	}
+	
+	public Long findDmRoom(long memberA, long memberB) {
+	    Map<String, Object> params = new HashMap<>();
+	    params.put("memberA", memberA);
+	    params.put("memberB", memberB);
+	    return sqlSession.selectOne("chat.findDmRoom", params);
 	}
 }

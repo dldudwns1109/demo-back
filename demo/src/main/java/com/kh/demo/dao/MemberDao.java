@@ -127,5 +127,8 @@ public class MemberDao {
 	    return sqlSession.selectOne("member.getAttachmentNo", memberNo);
 	}
 
-	
+	public String findNicknameById(long memberNo) {
+	    return sqlSession.selectOne("member.findNicknameById", memberNo);
+	}
+
 }
