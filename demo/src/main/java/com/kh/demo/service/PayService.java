@@ -2,6 +2,7 @@ package com.kh.demo.service;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,10 +16,12 @@ import org.springframework.web.client.RestTemplate;
 
 import com.kh.demo.configuration.KakaoPayProperties;
 import com.kh.demo.dao.AttachmentDao;
+import com.kh.demo.dao.ChatDao;
 import com.kh.demo.dao.CrewDao;
 import com.kh.demo.dao.CrewMemberDao;
 import com.kh.demo.dao.PayDao;
 import com.kh.demo.dto.AttachmentDto;
+import com.kh.demo.dto.ChatDto;
 import com.kh.demo.dto.CrewDto;
 import com.kh.demo.dto.CrewMemberDto;
 import com.kh.demo.dto.PayDetailDto;
@@ -47,6 +50,8 @@ public class PayService {
 	private AttachmentDao attachmentDao;
 	@Autowired
 	private CrewMemberDao crewMemberDao;
+	@Autowired
+	private ChatDao chatDao;
 	
 	//결제 준비(ready)
 	public PayReadyResponseVO ready(PayReadyVO vo) throws URISyntaxException {
@@ -181,7 +186,6 @@ public class PayService {
         crewDao.connect(crewNo, saved.getAttachmentNo());
         log.debug("✅ [5] crew_image 연결 완료");
         
-
         // 6. 모임장 등록
         long crewMemberNo = crewMemberDao.sequence();
         CrewMemberDto leaderDto = CrewMemberDto.builder()
@@ -195,6 +199,31 @@ public class PayService {
 
         crewMemberDao.join(leaderDto);
         log.debug("✅ [6] 모임장 등록 완료");
+        
+        // 7. 채팅방 생성
+        long chatRoomNo = chatDao.roomSequence();
+        chatDao.insert(ChatDto.builder()
+        	.chatRoomNo(chatRoomNo)
+        	.chatCrewNo(crewNo)
+        	.chatType("CREW") // ← 필수 설정
+        	.chatContent("채팅방이 생성되었습니다.")
+        	.chatTime(new Timestamp(System.currentTimeMillis()))
+        	.chatSender(Long.parseLong(approveVO.getPartnerUserId())) // 생성자
+        	.build()
+        );
+        log.debug("✅ [7] 채팅방 생성 메시지 등록 완료");
+        
+        // 8. 환영 메시지 삽입
+        chatDao.insert(ChatDto.builder()
+            .chatRoomNo(chatRoomNo)
+            .chatCrewNo(crewNo)
+            .chatType("SYSTEM")
+            .chatContent("🎉 새로운 모임이 개설되었습니다. 인사해 보세요!")
+            .chatTime(new Timestamp(System.currentTimeMillis()))
+            .chatSender(Long.parseLong(approveVO.getPartnerUserId()))
+            .build()
+        );
+        log.debug("✅ [8] 환영 메시지 등록 완료");
 
         log.debug("🎉 [insertDB] 전체 트랜잭션 성공 완료");
         
