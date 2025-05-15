@@ -113,7 +113,7 @@ public class CrewMemberRestController {
 		    	.chatRoomNo(crewChatRoomNo)
 		    	.chatCrewNo(crewNo)
 		    	.chatType("SYSTEM")
-		    	.chatContent(memberName + "님이 들어오셨습니다.\n" + chatContent)
+		    	.chatContent(memberName + "님이 들어오셨습니다!")
 		    	.chatTime(new Timestamp(System.currentTimeMillis()))
 		    	.chatSender(memberNo)
 		    	.build());
@@ -135,7 +135,7 @@ public class CrewMemberRestController {
 	        chatDao.insert(ChatDto.builder()
 	            .chatRoomNo(dmRoomNo)
 	            .chatType("DM")
-	            .chatContent(memberName + "님이 모임에 가입했습니다.\n가입인사: " + chatContent)
+	            .chatContent(memberName + "님이 모임에 가입했습니다!\n가입인사: " + chatContent)
 	            .chatTime(new Timestamp(System.currentTimeMillis()))
 	            .chatSender(memberNo)
 	            .chatReceiver(leaderNo)
