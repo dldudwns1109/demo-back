@@ -113,5 +113,33 @@
 	    WHERE meeting_no = #{meetingNo}
 	</update>
 
+	<select id="findMeetingByMemberNo" resultType="MeetingVO">
+		SELECT 
+	        m.meeting_no AS meetingNo,
+	        m.meeting_crew_no AS meetingCrewNo,
+	        m.meeting_owner_no AS meetingOwnerNo,
+	        m.meeting_name AS meetingName,
+	        m.meeting_date AS meetingDate,
+	        m.meeting_location AS meetingLocation,
+	        m.meeting_price AS meetingPrice,
+	        m.meeting_limit AS meetingLimit,
+	        m.meeting_create AS meetingCreate,
+	
+	        (SELECT mi.attachment_no 
+	         FROM meeting_image mi 
+	         WHERE mi.meeting_no = m.meeting_no 
+	         AND ROWNUM = 1) AS attachmentNo,
+	
+	        (SELECT COUNT(*) 
+	         FROM meeting_member mm 
+	         WHERE mm.meeting_no = m.meeting_no) AS memberCount
+	
+	    FROM meeting m
+	    where m.meeting_no in (
+			select meeting_no from meeting_member
+			where member_no = #{memberNo}
+		)
+	    ORDER BY m.meeting_date ASC
+	</select>
 	
 </mapper>

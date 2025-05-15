@@ -18,5 +18,6 @@ public class MemberChatRoomResponseVO {
 	private String accountNickname;
 	private String content;
 	private String type;
+	private Long chatRead;
 	private LocalDateTime time;
 }

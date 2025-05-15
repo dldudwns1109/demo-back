@@ -66,6 +66,7 @@ public class ChatRestController {
 					.accountNickname(memberDto.getMemberNickname())
 					.content(chatDto.getChatContent())
 					.time(chatDto.getChatTime().toLocalDateTime())
+					.chatRead(chatDto.getChatRead())
 				.build()
 			);
 		}

@@ -11,13 +11,12 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MemberChatResponseVO {
-	private Long messageNo;
-	private Long targetNo;
-	private Long accountNo;
-	private String accountNickname;
+public class MemberChatMessageVO {
+	private Long roomNo;
+	private Long senderNo;
+	private String senderNickname;
+	private Long receiverNo;
+	private String type; // 'DM' / 'CREW' / 'SYSTEM'
 	private String content;
-	private String type;
-	private Long chatRead;
 	private LocalDateTime time;
 }

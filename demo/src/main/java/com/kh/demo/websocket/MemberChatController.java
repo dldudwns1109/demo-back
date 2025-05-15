@@ -15,10 +15,15 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Controller;
 
 import com.kh.demo.dao.ChatDao;
+import com.kh.demo.dao.ChatReadDao;
+import com.kh.demo.dao.CrewMemberDao;
 import com.kh.demo.dao.MemberDao;
 import com.kh.demo.dto.ChatDto;
+import com.kh.demo.dto.ChatReadDto;
 import com.kh.demo.dto.MemberDto;
 import com.kh.demo.service.TokenService;
+import com.kh.demo.vo.websocket.ChatUserVO;
+import com.kh.demo.vo.websocket.MemberChatMessageVO;
 import com.kh.demo.vo.websocket.MemberChatResponseVO;
 import com.kh.demo.vo.websocket.MemberChatRoomResponseVO;
 import com.kh.demo.vo.websocket.MemberChatVO;
@@ -40,6 +45,13 @@ public class MemberChatController {
 	
 	@Autowired
 	private ChatDao chatDao;
+	
+	@Autowired
+	private ChatReadDao chatReadDao;
+	
+	@Autowired
+	private CrewMemberDao crewMemberDao;
+
 	
 	@MessageMapping("/member/room")
 	public void memberRoom(Message<?> message) {
@@ -64,6 +76,14 @@ public class MemberChatController {
 						.accountNickname(memberDto.getMemberNickname())
 						.content(chatDto.getChatContent())
 						.time(chatDto.getChatTime().toLocalDateTime())
+						.chatRead(
+							chatReadDao.countChatRoomUnread(
+								ChatReadDto.builder()
+									.chatRoomNo(roomNo)
+									.unreadMemberNo(memberNo)
+								.build()
+							)
+						)
 					.build()
 				);
 			}
@@ -71,6 +91,57 @@ public class MemberChatController {
 		
 		messagingTemplate.convertAndSend("/private/member/rooms/" 
 				+ memberNo, list);
+	}
+	
+	@MessageMapping("/member/read")
+	public void memberRead(Message<MemberChatVO> message) {
+		StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
+		String accessToken = accessor.getFirstNativeHeader("accessToken");
+		
+		if (accessToken == null || !accessToken.startsWith("Bearer ")) return;
+		long memberNo = tokenService.parseBearerToken(accessToken);
+		
+		chatReadDao.delete(
+			ChatReadDto.builder()
+				.chatRoomNo(message.getPayload().getTarget())
+				.unreadMemberNo(memberNo)
+			.build()
+		);
+		
+		List<Long> chatNoList =  chatDao.selectChatByRoomNo(message.getPayload().getTarget());
+		for (Long chatNo: chatNoList) {
+			chatDao.updateChatRead(chatNo);
+		}
+		
+		List<ChatDto> list = chatDao.selectChatMessageList(message.getPayload().getTarget());
+		
+		long targetNo = -1;
+		Set<ChatUserVO> set = new HashSet<>(chatDao.selectChatTarget(message.getPayload().getTarget()));
+		ChatUserVO chatUser = set.iterator().next();
+		
+		if (chatUser.getChatSender() != memberNo) 
+			targetNo = chatUser.getChatSender();
+		else targetNo = chatUser.getChatReceiver();
+		
+		log.debug("member = {}", memberNo);
+		List<MemberChatResponseVO> chatList = new ArrayList<>();
+		for (ChatDto chat : list) {
+			MemberDto memberDto = memberDao.findMemberByNo(chat.getChatSender());
+			chatList.add(
+				MemberChatResponseVO.builder()
+					.messageNo(chat.getChatNo())
+					.targetNo(chat.getChatReceiver())
+					.accountNo(chat.getChatSender())
+					.accountNickname(memberDto.getMemberNickname())
+					.content(chat.getChatContent())
+					.time(chat.getChatTime().toLocalDateTime())
+					.chatRead(chat.getChatRead())
+				.build()
+			);
+		}
+		
+		messagingTemplate.convertAndSend("/private/member/read/" 
+				+ message.getPayload().getTarget(), chatList);
 	}
 
 	@MessageMapping("/member/chat")
@@ -84,40 +155,113 @@ public class MemberChatController {
 		
 		MemberDto memberDto = memberDao.findMemberByNo(memberNo);
 		
+		long chatNo = chatDao.sequence();
 		MemberChatVO vo = message.getPayload();
-		log.debug("target = {}", vo.getTarget());
-		log.debug("content = {}", vo.getContent());
 		
 		MemberChatResponseVO response = MemberChatResponseVO.builder()
+				.messageNo(chatNo)
 				.targetNo(vo.getTarget())
 				.accountNo(memberDto.getMemberNo())
 				.accountNickname(memberDto.getMemberNickname())
 				.content(vo.getContent())
 				.time(LocalDateTime.now())
+				.chatRead(1L)
 				.build();
 		
 		messagingTemplate.convertAndSend("/private/member/chat/" 
 				+ String.valueOf(vo.getTarget()), response);
 		
 		long targetNo = -1;
-		Set<Long> set = new HashSet<>(chatDao.selectChatSender(vo.getTarget()));
-		if (set.size() > 1) {
-			for (long senderNo : set) {
-				if (senderNo != memberNo) targetNo = senderNo; 
-			}
-		} else targetNo = set.iterator().next();
+		Set<ChatUserVO> set = new HashSet<>(chatDao.selectChatTarget(vo.getTarget()));
+		ChatUserVO chatUser = set.iterator().next();
+		
+		if (chatUser.getChatSender() != memberNo) 
+			targetNo = chatUser.getChatSender();
+		else targetNo = chatUser.getChatReceiver();
 		
 		// 그룹 모임 시 조건처리하여 crewNo 넣어야함
 		chatDao.insert(
 			ChatDto.builder()
+				.chatNo(chatNo)
 //				.chatCrewNo(null)
 				.chatRoomNo(vo.getTarget())
 				.chatType("DM")
 				.chatContent(vo.getContent())
 				.chatTime(Timestamp.valueOf(response.getTime()))
+				.chatRead(1L)
 				.chatSender(memberNo)
 				.chatReceiver(targetNo)
 			.build()
 		);
+		
+		chatReadDao.insert(
+			ChatReadDto.builder()
+				.chatNo(chatNo)
+				.chatRoomNo(vo.getTarget())
+				.unreadMemberNo(targetNo)
+			.build()
+		);
 	}
+	
+    public void sendJoinWelcomeMessage(long crewNo, long memberNo, String chatContent) {
+        MemberDto memberDto = memberDao.findMemberByNo(memberNo);
+        String memberName = memberDto.getMemberNickname();
+
+        Long crewChatRoomNo = chatDao.findRoomByCrewNo(crewNo);
+        if (crewChatRoomNo != null) {
+            ChatDto welcomeMessage = ChatDto.builder()
+                    .chatRoomNo(crewChatRoomNo)
+                    .chatCrewNo(crewNo)
+                    .chatType("SYSTEM")
+                    .chatContent(memberName + "님이 들어오셨습니다!\n" + chatContent)
+                    .chatTime(new Timestamp(System.currentTimeMillis()))
+                    .chatSender(memberNo)
+                    .build();
+
+            chatDao.insert(welcomeMessage);
+
+            MemberChatMessageVO vo = MemberChatMessageVO.builder()
+            	    .roomNo(crewChatRoomNo)
+            	    .senderNo(memberNo)
+            	    .receiverNo(null)
+            	    .senderNickname(memberName)
+            	    .content(welcomeMessage.getChatContent())
+            	    .type("SYSTEM")
+            	    .time(LocalDateTime.now())
+            	    .build();
+
+            	messagingTemplate.convertAndSend("/private/member/chat/" + crewChatRoomNo, vo);
+        }
+
+        long leaderNo = crewMemberDao.findLeaderMemberNo(crewNo);
+        if (leaderNo != memberNo) {
+            Long dmRoomNo = chatDao.findDmRoom(memberNo, leaderNo);
+            if (dmRoomNo == null) {
+                dmRoomNo = chatDao.roomSequence();
+            }
+
+            ChatDto dmMessage = ChatDto.builder()
+                    .chatRoomNo(dmRoomNo)
+                    .chatType("DM")
+                    .chatContent(memberName + "님이 모임에 가입했습니다!\n가입인사: " + chatContent)
+                    .chatTime(new Timestamp(System.currentTimeMillis()))
+                    .chatSender(memberNo)
+                    .chatReceiver(leaderNo)
+                    .build();
+
+            chatDao.insert(dmMessage);
+
+            MemberChatMessageVO dmVO = MemberChatMessageVO.builder()
+            	    .roomNo(dmRoomNo) // ✅ DM 채팅방 번호
+            	    .senderNo(memberNo)
+            	    .receiverNo(leaderNo)
+            	    .senderNickname(memberName)
+            	    .content(dmMessage.getChatContent()) // ✅ DM 메시지 내용
+            	    .type("DM")
+            	    .time(LocalDateTime.now())
+            	    .build();
+
+            	messagingTemplate.convertAndSend("/private/member/chat/" + leaderNo, dmVO);
+        }
+    }
 }

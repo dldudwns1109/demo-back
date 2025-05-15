@@ -75,5 +75,9 @@ public class MeetingDao {
 	    params.put("newOwnerNo", newOwnerNo);
 	    return sqlSession.update("meeting.updateOwner", params) > 0;
 	}
+	
+	public List<MeetingVO> selectMeetingListByMember(long memberNo) {
+		return sqlSession.selectList("meeting.findMeetingByMemberNo", memberNo);
+	}
 
 }

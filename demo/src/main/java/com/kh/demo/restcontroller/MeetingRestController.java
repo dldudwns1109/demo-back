@@ -168,5 +168,8 @@ public class MeetingRestController {
 	    return true;
 	}
 
-	
+	@GetMapping("/member/{memberNo}")
+	public List<MeetingVO> listByMember(@PathVariable long memberNo) {
+		return meetingDao.selectMeetingListByMember(memberNo);
+	}
 }
