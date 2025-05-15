@@ -6,4 +6,5 @@ import lombok.Data;
 public class MemberChatVO {
 	private Long target;
 	private String content;
+	private Long crewNo;
 }

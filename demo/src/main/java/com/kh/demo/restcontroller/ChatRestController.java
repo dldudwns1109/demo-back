@@ -73,4 +73,9 @@ public class ChatRestController {
 		
 		return list;
 	}
+	
+	@GetMapping("/crew/{crewNo}")
+	public Long findCrewNo(@PathVariable long crewNo) {
+		return chatDao.findRoomNoByCrewNo(crewNo);
+	}
 }

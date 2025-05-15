@@ -63,4 +63,8 @@ public class ChatDao {
 	    params.put("memberB", memberB);
 	    return sqlSession.selectOne("chat.findDmRoom", params);
 	}
+	
+	public long findRoomNoByCrewNo(long crewNo) {
+	    return sqlSession.selectOne("chat.findRoomNoByCrewNo", crewNo);
+	}
 }

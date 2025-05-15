@@ -172,25 +172,27 @@ public class MemberChatController {
 				+ String.valueOf(vo.getTarget()), response);
 		
 		long targetNo = -1;
-		Set<ChatUserVO> set = new HashSet<>(chatDao.selectChatTarget(vo.getTarget()));
-		ChatUserVO chatUser = set.iterator().next();
-		
-		if (chatUser.getChatSender() != memberNo) 
-			targetNo = chatUser.getChatSender();
-		else targetNo = chatUser.getChatReceiver();
+		if (vo.getCrewNo() == null) {
+			Set<ChatUserVO> set = new HashSet<>(chatDao.selectChatTarget(vo.getTarget()));
+			ChatUserVO chatUser = set.iterator().next();
+			
+			if (chatUser.getChatSender() != memberNo) 
+				targetNo = chatUser.getChatSender();
+			else targetNo = chatUser.getChatReceiver();
+		}
 		
 		// 그룹 모임 시 조건처리하여 crewNo 넣어야함
 		chatDao.insert(
 			ChatDto.builder()
 				.chatNo(chatNo)
-//				.chatCrewNo(null)
+				.chatCrewNo(vo.getCrewNo() == null ? null : vo.getCrewNo())
 				.chatRoomNo(vo.getTarget())
-				.chatType("DM")
+				.chatType(vo.getCrewNo() == null ? "DM" : "CREW")
 				.chatContent(vo.getContent())
 				.chatTime(Timestamp.valueOf(response.getTime()))
-				.chatRead(1L)
-				.chatSender(memberNo)
-				.chatReceiver(targetNo)
+				.chatRead(vo.getCrewNo() == null ? 1L : crewMemberDao.selectMemberCnt(vo.getCrewNo()) - 1L)
+				.chatSender(vo.getCrewNo() == null ? memberNo : null)
+				.chatReceiver(vo.getCrewNo() == null ? targetNo : null)
 			.build()
 		);
 		

@@ -36,9 +36,9 @@ public class ChatTest {
 		chatDao.insert(
 				ChatDto.builder()
 					.chatNo(chatDao.sequence())
-					.chatCrewNo(null)
+					.chatCrewNo(61L)
 					.chatRoomNo(chatDao.roomSequence())
-					.chatType("DM")
+					.chatType("CREW")
 					.chatContent("최근 메세지임.")
 					.chatTime(Timestamp.valueOf(LocalDateTime.now()))
 					.chatRead(1L)
