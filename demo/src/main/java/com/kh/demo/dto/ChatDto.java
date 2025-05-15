@@ -18,6 +18,7 @@ public class ChatDto {
 	private String chatType;
 	private String chatContent;
 	private Timestamp chatTime;
+	private Long chatRead;
 	private Long chatSender;
 	private Long chatReceiver;
 }

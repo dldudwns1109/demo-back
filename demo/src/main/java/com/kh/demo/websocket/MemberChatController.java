@@ -21,6 +21,7 @@ import com.kh.demo.dto.ChatDto;
 import com.kh.demo.dto.ChatReadDto;
 import com.kh.demo.dto.MemberDto;
 import com.kh.demo.service.TokenService;
+import com.kh.demo.vo.websocket.ChatUserVO;
 import com.kh.demo.vo.websocket.MemberChatResponseVO;
 import com.kh.demo.vo.websocket.MemberChatRoomResponseVO;
 import com.kh.demo.vo.websocket.MemberChatVO;
@@ -69,6 +70,14 @@ public class MemberChatController {
 						.accountNickname(memberDto.getMemberNickname())
 						.content(chatDto.getChatContent())
 						.time(chatDto.getChatTime().toLocalDateTime())
+						.chatRead(
+							chatReadDao.countChatRoomUnread(
+								ChatReadDto.builder()
+									.chatRoomNo(roomNo)
+									.unreadMemberNo(memberNo)
+								.build()
+							)
+						)
 					.build()
 				);
 			}
@@ -92,6 +101,41 @@ public class MemberChatController {
 				.unreadMemberNo(memberNo)
 			.build()
 		);
+		
+		List<Long> chatNoList =  chatDao.selectChatByRoomNo(message.getPayload().getTarget());
+		for (Long chatNo: chatNoList) {
+			chatDao.updateChatRead(chatNo);
+		}
+		
+		List<ChatDto> list = chatDao.selectChatMessageList(message.getPayload().getTarget());
+		
+		long targetNo = -1;
+		Set<ChatUserVO> set = new HashSet<>(chatDao.selectChatTarget(message.getPayload().getTarget()));
+		ChatUserVO chatUser = set.iterator().next();
+		
+		if (chatUser.getChatSender() != memberNo) 
+			targetNo = chatUser.getChatSender();
+		else targetNo = chatUser.getChatReceiver();
+		
+		log.debug("member = {}", memberNo);
+		List<MemberChatResponseVO> chatList = new ArrayList<>();
+		for (ChatDto chat : list) {
+			MemberDto memberDto = memberDao.findMemberByNo(chat.getChatSender());
+			chatList.add(
+				MemberChatResponseVO.builder()
+					.messageNo(chat.getChatNo())
+					.targetNo(chat.getChatReceiver())
+					.accountNo(chat.getChatSender())
+					.accountNickname(memberDto.getMemberNickname())
+					.content(chat.getChatContent())
+					.time(chat.getChatTime().toLocalDateTime())
+					.chatRead(chat.getChatRead())
+				.build()
+			);
+		}
+		
+		messagingTemplate.convertAndSend("/private/member/read/" 
+				+ message.getPayload().getTarget(), chatList);
 	}
 
 	@MessageMapping("/member/chat")
@@ -105,30 +149,30 @@ public class MemberChatController {
 		
 		MemberDto memberDto = memberDao.findMemberByNo(memberNo);
 		
+		long chatNo = chatDao.sequence();
 		MemberChatVO vo = message.getPayload();
-		log.debug("target = {}", vo.getTarget());
-		log.debug("content = {}", vo.getContent());
 		
 		MemberChatResponseVO response = MemberChatResponseVO.builder()
+				.messageNo(chatNo)
 				.targetNo(vo.getTarget())
 				.accountNo(memberDto.getMemberNo())
 				.accountNickname(memberDto.getMemberNickname())
 				.content(vo.getContent())
 				.time(LocalDateTime.now())
+				.chatRead(1L)
 				.build();
 		
 		messagingTemplate.convertAndSend("/private/member/chat/" 
 				+ String.valueOf(vo.getTarget()), response);
 		
 		long targetNo = -1;
-		Set<Long> set = new HashSet<>(chatDao.selectChatSender(vo.getTarget()));
-		if (set.size() > 1) {
-			for (long senderNo : set) {
-				if (senderNo != memberNo) targetNo = senderNo; 
-			}
-		} else targetNo = set.iterator().next();
+		Set<ChatUserVO> set = new HashSet<>(chatDao.selectChatTarget(vo.getTarget()));
+		ChatUserVO chatUser = set.iterator().next();
 		
-		long chatNo = chatDao.sequence();
+		if (chatUser.getChatSender() != memberNo) 
+			targetNo = chatUser.getChatSender();
+		else targetNo = chatUser.getChatReceiver();
+		
 		// 그룹 모임 시 조건처리하여 crewNo 넣어야함
 		chatDao.insert(
 			ChatDto.builder()
@@ -138,6 +182,7 @@ public class MemberChatController {
 				.chatType("DM")
 				.chatContent(vo.getContent())
 				.chatTime(Timestamp.valueOf(response.getTime()))
+				.chatRead(1L)
 				.chatSender(memberNo)
 				.chatReceiver(targetNo)
 			.build()

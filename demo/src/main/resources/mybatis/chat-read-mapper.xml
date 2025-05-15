@@ -18,4 +18,15 @@
 		where chat_room_no = #{chatRoomNo}
 		and unread_member_no = #{unreadMemberNo}
 	</delete>
+	
+	<select id="countChatUnread" resultType="long">
+		select count(*) from chat_read
+		where chat_no = #{chatNo}
+	</select>
+	
+	<select id="countChatRoomUnread" resultType="long">
+		select count(*) from chat_read
+		where chat_room_no = #{chatRoomNo}
+		and unread_member_no = #{unreadMemberNo}
+	</select>
 </mapper>

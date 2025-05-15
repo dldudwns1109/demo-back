@@ -19,4 +19,12 @@ public class ChatReadDao {
 	public boolean delete(ChatReadDto chatReadDto) {
 		return sqlSession.delete("chatread.delete", chatReadDto) > 0;
 	}
+	
+	public long countChatUnread(long chatNo) {
+		return sqlSession.selectOne("chatread.countChatUnread", chatNo);
+	}
+	
+	public long countChatRoomUnread(ChatReadDto chatReadDto) {
+		return sqlSession.selectOne("chatread.countChatRoomUnread", chatReadDto);
+	}
 }

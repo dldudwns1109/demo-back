@@ -13,11 +13,11 @@
 		insert into chat (
 			chat_no, chat_room_no, chat_crew_no, 
 			chat_type, chat_content, chat_time, 
-			chat_sender, chat_receiver
+			chat_read, chat_sender, chat_receiver
 		) values (
 			#{chatNo}, #{chatRoomNo}, #{chatCrewNo}, 
 			#{chatType}, #{chatContent}, #{chatTime}, 
-			#{chatSender}, #{chatReceiver}
+			#{chatRead}, #{chatSender}, #{chatReceiver}
 		)
 	</insert>
 	<select id="findChatList" resultType="long">
@@ -43,8 +43,23 @@
 		order by chat_time asc
 	</select>
 	
-	<select id="findChatSender" resultType="long">
-		select chat_sender from chat
+	<select id="findChatReceiverandSender" resultType="ChatUserVO">
+		select chat_receiver, chat_sender from chat
 		where chat_room_no = #{chatRoomNo}
 	</select>
+	
+	<update id="updateChatCnt">
+		update chat c
+		set c.chat_read = (
+		select count(*) from chat_read cr
+			where cr.chat_no = c.chat_no
+		)
+		where c.chat_no = #{chatNo}
+	</update>
+	
+	<select id="findChatByRoomNo" resultType="long">
+		select chat_no from chat
+		where chat_room_no = #{chatRoomNo}
+	</select>
+	
 </mapper>

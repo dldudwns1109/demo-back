@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.kh.demo.dto.ChatDto;
+import com.kh.demo.vo.websocket.ChatUserVO;
 
 @Repository
 public class ChatDao {
@@ -38,7 +39,15 @@ public class ChatDao {
 		return sqlSession.selectList("chat.findChatMessageList", roomNo);
 	}
 	
-	public List<Long> selectChatSender(long roomNo) {
-		return sqlSession.selectList("chat.findChatSender", roomNo);
+	public List<ChatUserVO> selectChatTarget(long roomNo) {
+		return sqlSession.selectList("chat.findChatReceiverandSender", roomNo);
+	}
+	
+	public List<Long> selectChatByRoomNo(long roomNo) {
+		return sqlSession.selectList("chat.findChatByRoomNo", roomNo);
+	}
+	
+	public boolean updateChatRead(long chatNo) {
+		return sqlSession.update("chat.updateChatCnt", chatNo) > 0;
 	}
 }
