@@ -13,4 +13,5 @@ public class MemberSigninResponseVO {
 	private long memberNo;
 	private String accessToken;
 	private String refreshToken;
+	private String location;
 }

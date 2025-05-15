@@ -85,6 +85,7 @@ public class MemberRestController {
 					.memberNo(findDto.getMemberNo())
 					.accessToken(tokenService.generateAccessToken(findDto))
 					.refreshToken(tokenService.generateRefreshToken(findDto))
+					.location(findDto.getMemberLocation())
 				.build();
 	}
 	
@@ -243,41 +244,6 @@ public class MemberRestController {
 	        response.sendRedirect("/images/default-profile.png");
 	    }
 	}
-
-		
-	
-//	@GetMapping("/image/{memberNo}")
-//	public void showImage(@PathVariable long memberNo,
-//	                      HttpServletRequest request,
-//	                      HttpServletResponse response) throws IOException {
-//	    try {
-//	        System.out.println("Requested Member No: " + memberNo);
-//	        long attachmentNo = memberDao.findImage(memberNo);
-//	        System.out.println("Attachment No Found: " + attachmentNo);
-//	        String contextPath = request.getContextPath();
-//	        response.sendRedirect(contextPath + "/api/attachment/" + attachmentNo);
-//	    } catch (Exception e) {
-//	        e.printStackTrace();
-//	        response.sendRedirect("https://dummyimage.com/400x400/000/fff");
-//	    }
-//	}
-//	@GetMapping("/image/{attachmentNo}")
-//	public void showImage(@PathVariable long memberNo,
-//	                      HttpServletRequest request,
-//	                      HttpServletResponse response) throws IOException {
-//	    try {
-//	        System.out.println("Requested Member No: " + memberNo);
-//	        long attachmentNo = memberDao.findImage(memberNo);
-//	        System.out.println("Attachment No Found: " + attachmentNo);
-//	        String contextPath = request.getContextPath();
-//	        response.sendRedirect(contextPath + "/api/attachment/" + attachmentNo);
-//	    } catch (Exception e) {
-//	        e.printStackTrace();
-//	        response.sendRedirect("https://dummyimage.com/400x400/000/fff");
-//	    }
-//	}
-
-	
 	
 	@GetMapping("/findMemberNo/{memberNickname}")
 	public long findMemberNo(@PathVariable String memberNickname) {
