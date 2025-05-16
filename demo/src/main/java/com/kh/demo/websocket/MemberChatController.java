@@ -22,6 +22,7 @@ import com.kh.demo.dto.ChatDto;
 import com.kh.demo.dto.ChatReadDto;
 import com.kh.demo.dto.MemberDto;
 import com.kh.demo.service.TokenService;
+import com.kh.demo.vo.websocket.ChatReadDeleteVO;
 import com.kh.demo.vo.websocket.ChatUserVO;
 import com.kh.demo.vo.websocket.MemberChatMessageVO;
 import com.kh.demo.vo.websocket.MemberChatResponseVO;
@@ -102,7 +103,7 @@ public class MemberChatController {
 		long memberNo = tokenService.parseBearerToken(accessToken);
 		
 		chatReadDao.delete(
-			ChatReadDto.builder()
+			ChatReadDeleteVO.builder()
 				.chatRoomNo(message.getPayload().getTarget())
 				.unreadMemberNo(memberNo)
 			.build()
@@ -116,14 +117,15 @@ public class MemberChatController {
 		List<ChatDto> list = chatDao.selectChatMessageList(message.getPayload().getTarget());
 		
 		long targetNo = -1;
-		Set<ChatUserVO> set = new HashSet<>(chatDao.selectChatTarget(message.getPayload().getTarget()));
-		ChatUserVO chatUser = set.iterator().next();
+		if (message.getPayload().getCrewNo() == null) {
+			Set<ChatUserVO> set = new HashSet<>(chatDao.selectChatTarget(message.getPayload().getTarget()));
+			ChatUserVO chatUser = set.iterator().next();
+			
+			if (chatUser.getChatSender() != memberNo) 
+				targetNo = chatUser.getChatSender();
+			else targetNo = chatUser.getChatReceiver();
+		}
 		
-		if (chatUser.getChatSender() != memberNo) 
-			targetNo = chatUser.getChatSender();
-		else targetNo = chatUser.getChatReceiver();
-		
-		log.debug("member = {}", memberNo);
 		List<MemberChatResponseVO> chatList = new ArrayList<>();
 		for (ChatDto chat : list) {
 			MemberDto memberDto = memberDao.findMemberByNo(chat.getChatSender());
@@ -165,7 +167,7 @@ public class MemberChatController {
 				.accountNickname(memberDto.getMemberNickname())
 				.content(vo.getContent())
 				.time(LocalDateTime.now())
-				.chatRead(1L)
+				.chatRead(vo.getCrewNo() == null ? 1L : crewMemberDao.selectMemberCnt(vo.getCrewNo()) - 1L)
 				.build();
 		
 		messagingTemplate.convertAndSend("/private/member/chat/" 
@@ -191,7 +193,7 @@ public class MemberChatController {
 				.chatContent(vo.getContent())
 				.chatTime(Timestamp.valueOf(response.getTime()))
 				.chatRead(vo.getCrewNo() == null ? 1L : crewMemberDao.selectMemberCnt(vo.getCrewNo()) - 1L)
-				.chatSender(vo.getCrewNo() == null ? memberNo : null)
+				.chatSender(memberNo)
 				.chatReceiver(vo.getCrewNo() == null ? targetNo : null)
 			.build()
 		);

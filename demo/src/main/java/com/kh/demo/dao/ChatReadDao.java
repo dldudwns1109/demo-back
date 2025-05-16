@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.kh.demo.dto.ChatReadDto;
+import com.kh.demo.vo.websocket.ChatReadDeleteVO;
 
 @Repository
 public class ChatReadDao {
@@ -16,8 +17,8 @@ public class ChatReadDao {
 		sqlSession.insert("chatread.insert", chatReadDto);
 	}
 	
-	public boolean delete(ChatReadDto chatReadDto) {
-		return sqlSession.delete("chatread.delete", chatReadDto) > 0;
+	public boolean delete(ChatReadDeleteVO chatReadDeleteVO) {
+		return sqlSession.delete("chatread.delete", chatReadDeleteVO) > 0;
 	}
 	
 	public long countChatUnread(long chatNo) {
