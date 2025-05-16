@@ -36,14 +36,14 @@ public class ChatTest {
 		chatDao.insert(
 				ChatDto.builder()
 					.chatNo(chatDao.sequence())
-					.chatCrewNo(null)
+					.chatCrewNo(61L)
 					.chatRoomNo(chatDao.roomSequence())
-					.chatType("DM")
-					.chatContent("최근 메세지임.")
+					.chatType("SYSTEM")
+					.chatContent("모임 개설")
 					.chatTime(Timestamp.valueOf(LocalDateTime.now()))
-					.chatRead(1L)
-					.chatSender(144L)
-					.chatReceiver(142L)
+					.chatRead(0L)
+					.chatSender(null)
+					.chatReceiver(null)
 				.build()
 			);
 	}

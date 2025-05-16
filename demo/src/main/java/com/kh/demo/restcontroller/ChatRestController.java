@@ -66,14 +66,17 @@ public class ChatRestController {
 	public List<MemberChatRoomResponseVO> messageList(@PathVariable long roomNo) {
 		List<MemberChatRoomResponseVO> list = new ArrayList<>();
 		for (ChatDto chatDto: chatDao.selectChatMessageList(roomNo)) {
-			long targetNo = chatDto.getChatSender();		
-			MemberDto memberDto = memberDao.findMemberByNo(targetNo);
+			Long targetNo = chatDto.getChatSender();
+			
+			MemberDto memberDto = null;
+			if (targetNo != null)
+				memberDto = memberDao.findMemberByNo(targetNo);
 			
 			list.add(
 				MemberChatRoomResponseVO.builder()
 					.roomNo(roomNo)
 					.accountNo(targetNo)
-					.accountNickname(memberDto.getMemberNickname())
+					.accountNickname(memberDto == null ? null : memberDto.getMemberNickname())
 					.content(chatDto.getChatContent())
 					.time(chatDto.getChatTime().toLocalDateTime())
 					.chatRead(chatDto.getChatRead())
@@ -126,4 +129,9 @@ public class ChatRestController {
         chatDao.insert(chatDto);
     }
 
+	@GetMapping("/crew/{crewNo}")
+	public Long findCrewNo(@PathVariable long crewNo) {
+		return chatDao.findRoomNoByCrewNo(crewNo);
+	}
+	
 }

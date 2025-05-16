@@ -149,4 +149,9 @@
 		and leader = 'Y'
 	</select>
 	
+	<select id="findCrewMemberNo" resultType="long">
+		select member_no from crew_member
+		where crew_no = #{crewNo}
+	</select>
+	
 </mapper>

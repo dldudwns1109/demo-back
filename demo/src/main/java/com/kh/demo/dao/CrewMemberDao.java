@@ -79,4 +79,7 @@ public class CrewMemberDao {
     	return sqlSession.selectOne("crewmember.findLeaderMemberNo", crewNo);
     }
     
+    public List<Long> findCrewMemberNo(long crewNo) {
+    	return sqlSession.selectList("crewmember.findCrewMemberNo", crewNo);
+    }
 }
