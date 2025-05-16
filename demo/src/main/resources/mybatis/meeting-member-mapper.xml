@@ -65,6 +65,35 @@
 	    END
 	    WHERE meeting_no = #{meetingNo}
 	</update>
+	
+	<!-- 모임장 인지 -->
+	<select id="isLeader" resultType="boolean">
+	  SELECT CASE WHEN is_leader = 'Y' THEN 1 ELSE 0 END
+	  FROM meeting_member
+	  WHERE meeting_no = #{meetingNo}
+	    AND member_no = #{memberNo}
+	</select>
+	
+	<select id="findMeetingNoListByCrewNoAndMemberNo" resultType="long">
+	  SELECT mm.meeting_no
+	  FROM meeting_member mm
+	  JOIN meeting m ON mm.meeting_no = m.meeting_no
+	  WHERE mm.member_no = #{memberNo}
+	    AND m.meeting_crew_no = #{crewNo}
+	</select>
+
+	<select id="findOthers" resultType="com.kh.demo.dto.MeetingMemberDto">
+	  SELECT
+	    meeting_member_no,
+	    meeting_no,
+	    member_no,
+	    meeting_member_join_date,
+	    is_leader
+	  FROM meeting_member
+	  WHERE meeting_no = #{meetingNo}
+	    AND member_no != #{memberNo}
+	  ORDER BY meeting_member_join_date ASC
+	</select>
 
 
 </mapper>
