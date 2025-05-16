@@ -128,13 +128,15 @@ public class MemberChatController {
 		
 		List<MemberChatResponseVO> chatList = new ArrayList<>();
 		for (ChatDto chat : list) {
-			MemberDto memberDto = memberDao.findMemberByNo(chat.getChatSender());
+			MemberDto memberDto = null;
+			if (chat.getChatSender() != null)
+				memberDto = memberDao.findMemberByNo(chat.getChatSender());
 			chatList.add(
 				MemberChatResponseVO.builder()
 					.messageNo(chat.getChatNo())
 					.targetNo(chat.getChatReceiver())
 					.accountNo(chat.getChatSender())
-					.accountNickname(memberDto.getMemberNickname())
+					.accountNickname(memberDto == null ? null : memberDto.getMemberNickname())
 					.content(chat.getChatContent())
 					.time(chat.getChatTime().toLocalDateTime())
 					.chatRead(chat.getChatRead())
@@ -198,13 +200,27 @@ public class MemberChatController {
 			.build()
 		);
 		
-		chatReadDao.insert(
-			ChatReadDto.builder()
-				.chatNo(chatNo)
-				.chatRoomNo(vo.getTarget())
-				.unreadMemberNo(targetNo)
-			.build()
-		);
+		if (vo.getCrewNo() == null) {
+			chatReadDao.insert(
+				ChatReadDto.builder()
+					.chatNo(chatNo)
+					.chatRoomNo(vo.getTarget())
+					.unreadMemberNo(targetNo)
+				.build()
+			);			
+		} else {
+			for (long crewMemberNo: crewMemberDao.findCrewMemberNo(vo.getCrewNo())) {
+				if (crewMemberNo == memberNo) continue;
+				chatReadDao.insert(
+					ChatReadDto.builder()
+						.chatNo(chatNo)
+						.chatRoomNo(vo.getTarget())
+						.unreadMemberNo(crewMemberNo)
+					.build()
+				);
+			}
+		}
+		
 	}
 	
     public void sendJoinWelcomeMessage(long crewNo, long memberNo, String chatContent) {

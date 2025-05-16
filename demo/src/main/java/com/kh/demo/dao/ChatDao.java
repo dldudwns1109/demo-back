@@ -64,7 +64,7 @@ public class ChatDao {
 	    return sqlSession.selectOne("chat.findDmRoom", params);
 	}
 	
-	public long findRoomNoByCrewNo(long crewNo) {
+	public Long findRoomNoByCrewNo(long crewNo) {
 	    return sqlSession.selectOne("chat.findRoomNoByCrewNo", crewNo);
 	}
 }

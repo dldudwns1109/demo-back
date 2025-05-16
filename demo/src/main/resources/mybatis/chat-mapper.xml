@@ -33,6 +33,7 @@
 		select * from (
 			select * from chat
 			where chat_room_no = #{chatRoomNo}
+			and chat_type = 'DM'
 			order by chat_time desc
 		) where rownum = 1
 	</select>
@@ -94,11 +95,11 @@
 		from (
 			select chat_room_no
 			from chat
-			where chat_type = 'CREW'
-			or chat_type = 'SYSTEM'
+			where (chat_type = 'CREW' or chat_type = 'SYSTEM')
 			and chat_crew_no = #{crewNo}
-			order by chat_time desc
+			order by chat_time asc
 		)
 		where rownum = 1
 	</select>
+	
 </mapper>

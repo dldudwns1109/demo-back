@@ -38,12 +38,12 @@ public class ChatTest {
 					.chatNo(chatDao.sequence())
 					.chatCrewNo(61L)
 					.chatRoomNo(chatDao.roomSequence())
-					.chatType("CREW")
-					.chatContent("최근 메세지임.")
+					.chatType("SYSTEM")
+					.chatContent("모임 개설")
 					.chatTime(Timestamp.valueOf(LocalDateTime.now()))
-					.chatRead(1L)
-					.chatSender(144L)
-					.chatReceiver(142L)
+					.chatRead(0L)
+					.chatSender(null)
+					.chatReceiver(null)
 				.build()
 			);
 	}
