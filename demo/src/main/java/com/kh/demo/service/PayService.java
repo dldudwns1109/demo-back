@@ -200,43 +200,39 @@ public class PayService {
         crewMemberDao.join(leaderDto);
         log.debug("✅ [6] 모임장 등록 완료");
         
-        // 7. 채팅방 생성
         long chatRoomNo = chatDao.roomSequence();
 
+//        long chatNo1 = chatDao.sequence();
+//        log.debug("💬 chatNo1 = {}", chatNo1);
+//
+//
+//
+//        chatDao.insert(ChatDto.builder()
+//        	.chatNo(chatNo1)
+//        	.chatRoomNo(chatRoomNo)
+//        	.chatCrewNo(crewNo)
+//        	.chatType("CREW") // ← 필수 설정
+//        	.chatContent("채팅방이 생성되었습니다.")
+//        	.chatTime(new Timestamp(System.currentTimeMillis()))
+//        	.chatSender(Long.parseLong(approveVO.getPartnerUserId())) // 생성자
+//        	.chatRead(0L)
+//        	.build()
+//        );
+//        log.debug("✅ [7] 채팅방 생성 메시지 등록 완료");
+        
         long chatNo1 = chatDao.sequence();
-        log.debug("💬 chatNo1 = {}", chatNo1);
-
-
-
+        log.debug("💬 chatNo2 = {}", chatNo1);
+        
         chatDao.insert(ChatDto.builder()
         	.chatNo(chatNo1)
-        	.chatRoomNo(chatRoomNo)
-        	.chatCrewNo(crewNo)
-        	.chatType("CREW") // ← 필수 설정
-        	.chatContent("채팅방이 생성되었습니다.")
-        	.chatTime(new Timestamp(System.currentTimeMillis()))
-        	.chatSender(Long.parseLong(approveVO.getPartnerUserId())) // 생성자
-        	.chatRead(0L)
-        	.build()
-        );
-        log.debug("✅ [7] 채팅방 생성 메시지 등록 완료");
-        
-        long chatNo2 = chatDao.sequence();
-        log.debug("💬 chatNo2 = {}", chatNo2);
-        
-        // 8. 환영 메시지 삽입
-        chatDao.insert(ChatDto.builder()
-        	.chatNo(chatNo2)
             .chatRoomNo(chatRoomNo)
             .chatCrewNo(crewNo)
             .chatType("SYSTEM")
             .chatContent("🎉 새로운 모임이 개설되었습니다. 인사해 보세요!")
             .chatTime(new Timestamp(System.currentTimeMillis()))
-            .chatSender(Long.parseLong(approveVO.getPartnerUserId()))
             .chatRead(0L)
             .build()
         );
-        log.debug("✅ [8] 환영 메시지 등록 완료");
 
         log.debug("🎉 [insertDB] 전체 트랜잭션 성공 완료");
         

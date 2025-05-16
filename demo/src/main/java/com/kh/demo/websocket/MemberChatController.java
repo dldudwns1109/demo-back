@@ -207,16 +207,18 @@ public class MemberChatController {
 	    MemberDto memberDto = memberDao.findMemberByNo(memberNo);
 	    String memberName = memberDto.getMemberNickname();
 
-	    Long crewChatRoomNo = chatDao.findRoomByCrewNo(crewNo);
-	    if (crewChatRoomNo != null) {
+	    Long chatRoomNo = chatDao.findRoomByCrewNo(crewNo);
+	    log.debug("chatRoomNo = {}", chatRoomNo);
+	    
+	    if (chatRoomNo != null) {
 	        long systemChatNo = chatDao.sequence(); // 💡 시퀀스 할당
 
 	        ChatDto welcomeMessage = ChatDto.builder()
 	                .chatNo(systemChatNo)
-	                .chatRoomNo(crewChatRoomNo)
+	                .chatRoomNo(chatRoomNo)
 	                .chatCrewNo(crewNo)
 	                .chatType("SYSTEM")
-	                .chatContent(memberName + "님이 들어오셨습니다!\n" + chatContent)
+	                .chatContent(memberName + "님이 들어오셨습니다!\n")
 	                .chatTime(new Timestamp(System.currentTimeMillis()))
 	                .chatSender(memberNo)
 	                .chatRead(0L)
@@ -225,7 +227,7 @@ public class MemberChatController {
 	        chatDao.insert(welcomeMessage);
 
 	        MemberChatMessageVO vo = MemberChatMessageVO.builder()
-	                .roomNo(crewChatRoomNo)
+	                .roomNo(chatRoomNo)
 	                .senderNo(memberNo)
 	                .receiverNo(null)
 	                .senderNickname(memberName)
@@ -234,7 +236,7 @@ public class MemberChatController {
 	                .time(LocalDateTime.now())
 	                .build();
 
-	        messagingTemplate.convertAndSend("/private/member/chat/" + crewChatRoomNo, vo);
+	        messagingTemplate.convertAndSend("/private/member/chat/" + chatRoomNo, vo);
 	    }
 
 	    long leaderNo = crewMemberDao.findLeaderMemberNo(crewNo);
@@ -250,7 +252,7 @@ public class MemberChatController {
 	                .chatNo(dmChatNo)
 	                .chatRoomNo(dmRoomNo)
 	                .chatType("DM")
-	                .chatContent(memberName + "님이 모임에 가입했습니다!\n가입인사: " + chatContent)
+	                .chatContent(chatContent)
 	                .chatTime(new Timestamp(System.currentTimeMillis()))
 	                .chatSender(memberNo)
 	                .chatReceiver(leaderNo)
