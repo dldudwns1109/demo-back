@@ -16,9 +16,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kh.demo.dao.CrewMemberDao;
+import com.kh.demo.dao.MeetingDao;
+import com.kh.demo.dao.MeetingMemberDao;
 import com.kh.demo.dto.CrewJoinRequestDto;
 import com.kh.demo.dto.CrewMemberDto;
-import com.kh.demo.error.TargetNotFoundException;
+import com.kh.demo.dto.MeetingMemberDto;
 import com.kh.demo.service.BoardService;
 import com.kh.demo.service.ChatService;
 import com.kh.demo.service.TokenService;
@@ -37,43 +39,12 @@ public class CrewMemberRestController {
 	private BoardService boardService;
 	@Autowired
 	private ChatService chatService;
+	@Autowired
+	private MeetingMemberDao meetingMemberDao;
+	@Autowired
+	private MeetingDao meetingDao;
 
 	// 모임 가입 처리
-//	@PostMapping("/{crewNo}/join")
-//	public void join(@PathVariable Long crewNo,
-//					@RequestHeader("Authorization") String token) {
-//		System.out.println("Authorization Header: " + token);
-//		
-//		long memberNo = tokenService.parse(token.trim());
-//		
-//		long crewMemberNo = crewMemberDao.sequence(); // ★ 이거 꼭 필요함
-//
-//	    CrewMemberDto crewMemberDto = CrewMemberDto.builder()
-//	            .crewMemberNo(crewMemberNo) // ★ 여기 추가!
-//	            .crewNo(crewNo)
-//	            .memberNo(memberNo)
-//	            .leader("N")
-//	            .joinDate(LocalDate.now().toString()) // joinDate도 직접 넣기로 했으므로
-//	            .build();
-//
-//	    crewMemberDao.join(crewMemberDto);
-//	}
-
-//	@PostMapping("/{crewNo}/join")
-//	public void join(@PathVariable Long crewNo, @RequestHeader("Authorization") String authorizationHeader) {
-//
-//		System.out.println("Authorization Header: " + authorizationHeader); // 로그 추가
-//
-//		long memberNo = tokenService.parseBearerToken(authorizationHeader);
-//
-//		long crewMemberNo = crewMemberDao.sequence();
-//
-//		CrewMemberDto crewMemberDto = CrewMemberDto.builder().crewMemberNo(crewMemberNo).crewNo(crewNo)
-//				.memberNo(memberNo).leader("N").joinDate(LocalDate.now().toString()).build();
-//
-//		crewMemberDao.join(crewMemberDto);
-//	}
-
 	@Transactional
 	@PostMapping("/{crewNo}/join")
 	public void join(@PathVariable Long crewNo, @RequestHeader("Authorization") String authorizationHeader,
@@ -94,7 +65,7 @@ public class CrewMemberRestController {
 	    chatService.sendJoinSystemMessage(crewNo, memberNo); // 시스템 메세지
 	    chatService.sendJoinDmMessage(crewNo, memberNo, chatContent); // 가입인사 DM
 	}
-
+	//모임 탈퇴 처리
 	@DeleteMapping("/{crewNo}/leave")
 	public boolean leave(@PathVariable Long crewNo,
 	                     @RequestHeader("Authorization") String authorizationHeader) {
@@ -152,20 +123,60 @@ public class CrewMemberRestController {
 
 	// 모임장 회원 강퇴
 	@DeleteMapping("/{crewNo}/kick/{memberNo}")
-	public boolean kick(@PathVariable Long crewNo, @PathVariable Long memberNo,
-			@RequestHeader("Authorization") String authorizationHeader) {
+	public boolean kick(@PathVariable Long crewNo,
+	                    @PathVariable Long memberNo,
+	                    @RequestHeader("Authorization") String token) {
 
-		long loginMemberNo = tokenService.parseBearerToken(authorizationHeader);
+	    long loginMemberNo = tokenService.parseBearerToken(token);
 
-		CrewMemberDto checkDto = CrewMemberDto.builder().crewNo(crewNo).memberNo(loginMemberNo).build();
+	    // 모임장만 강퇴 가능
+	    CrewMemberDto leaderCheck = CrewMemberDto.builder()
+	            .crewNo(crewNo)
+	            .memberNo(loginMemberNo)
+	            .build();
+	    if (!crewMemberDao.isLeader(leaderCheck)) return false;
 
-		if (!crewMemberDao.isLeader(checkDto)) {
-			return false;
-		}
+	    // 강퇴 대상이 참여한 정모 목록 조회 (해당 모임 내)
+	    List<Long> meetingNoList = meetingMemberDao.findMeetingNoListByCrewNoAndMemberNo(crewNo, memberNo);
 
-		CrewMemberDto kickDto = CrewMemberDto.builder().crewNo(crewNo).memberNo(memberNo).build();
+	    for (Long meetingNo : meetingNoList) {
+	        if (meetingMemberDao.isLeader(meetingNo, memberNo)) {
+	        	// 정모장일 경우
+	        	List<MeetingMemberDto> others = meetingMemberDao.findOthers(meetingNo, memberNo);
 
-		return crewMemberDao.kick(kickDto);
+	        	if (others.isEmpty()) {
+	        	    // 혼자였다면 정모 삭제
+	        	    meetingDao.delete(meetingNo);
+	        	} else {
+	        	    // 위임 대상 선정
+	        	    MeetingMemberDto nextLeader = others.get(0);
+
+	        	    // ✅ 1. meeting_member 테이블에서 리더 변경
+	        	    meetingMemberDao.updateLeaderStatus(meetingNo, nextLeader.getMemberNo());
+
+	        	    // ✅ 2. meeting 테이블의 ownerNo도 같이 변경
+	        	    meetingDao.updateOwner(meetingNo, nextLeader.getMemberNo());
+
+	        	    // ✅ 3. 기존 리더 삭제
+	        	    meetingMemberDao.delete(meetingNo, memberNo);
+	        	}
+	        }
+	    }
+
+	    // 모임에서 최종 강퇴
+	    CrewMemberDto kickDto = CrewMemberDto.builder()
+	            .crewNo(crewNo)
+	            .memberNo(memberNo)
+	            .build();
+
+	    boolean isLeft = crewMemberDao.kick(kickDto);
+	    
+	    if (isLeft) {
+	        //강퇴 메시지 전송
+	        chatService.sendKickSystemMessage(crewNo, memberNo);
+	    }
+	    return isLeft;
 	}
+
 
 }

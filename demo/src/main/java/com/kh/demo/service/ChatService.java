@@ -52,7 +52,6 @@ public class ChatService {
                     .chatType("SYSTEM")
                     .chatContent(memberName + "님이 들어오셨습니다!\n")
                     .chatTime(new Timestamp(System.currentTimeMillis()))
-                    .chatSender(memberNo)
                     .chatRead(0L)
                     .build();
 
@@ -92,7 +91,6 @@ public class ChatService {
                     .chatType("SYSTEM")
                     .chatContent(memberName + "님이 모임을 떠났습니다.\n")
                     .chatTime(new Timestamp(System.currentTimeMillis()))
-                    .chatSender(memberNo)
                     .chatRead(0L)
                     .build();
 
@@ -111,6 +109,46 @@ public class ChatService {
             messagingTemplate.convertAndSend("/private/member/chat/" + chatRoomNo, vo);
         }
     }
+    
+    /**
+     * 모임 강퇴 시 시스템 메시지 전송
+     */
+    public void sendKickSystemMessage(long crewNo, long memberNo) {
+        MemberDto memberDto = memberDao.findMemberByNo(memberNo);
+        String memberName = memberDto.getMemberNickname();
+
+        Long chatRoomNo = chatDao.findRoomByCrewNo(crewNo);
+        log.debug("chatRoomNo = {}", chatRoomNo);
+
+        if (chatRoomNo != null) {
+            long chatNo = chatDao.sequence();
+
+            ChatDto leaveMessage = ChatDto.builder()
+                    .chatNo(chatNo)
+                    .chatRoomNo(chatRoomNo)
+                    .chatCrewNo(crewNo)
+                    .chatType("SYSTEM")
+                    .chatContent(memberName + "님이 강퇴 되었습니다!")
+                    .chatTime(new Timestamp(System.currentTimeMillis()))
+                    .chatRead(0L)
+                    .build();
+
+            chatDao.insert(leaveMessage);
+
+            MemberChatMessageVO vo = MemberChatMessageVO.builder()
+                    .roomNo(chatRoomNo)
+                    .senderNo(memberNo)
+                    .receiverNo(null)
+                    .senderNickname(memberName)
+                    .content(leaveMessage.getChatContent())
+                    .type("SYSTEM")
+                    .time(LocalDateTime.now())
+                    .build();
+
+            messagingTemplate.convertAndSend("/private/member/chat/" + chatRoomNo, vo);
+        }
+    }
+    
     /**
      * 모임 가입 시 모임 회장에게 DM 메시지 전송
      */
