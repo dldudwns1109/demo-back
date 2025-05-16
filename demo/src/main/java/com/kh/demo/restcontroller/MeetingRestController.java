@@ -1,8 +1,10 @@
 package com.kh.demo.restcontroller;
 
-import java.io.IOException;
+import java.io.IOException;import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.kh.demo.dao.CrewDao;
 import com.kh.demo.dao.MeetingDao;
 import com.kh.demo.dao.MeetingMemberDao;
 import com.kh.demo.dto.AttachmentDto;
@@ -26,6 +29,7 @@ import com.kh.demo.dto.MeetingDto;
 import com.kh.demo.dto.MeetingMemberDto;
 import com.kh.demo.service.AttachmentService;
 import com.kh.demo.service.TokenService;
+import com.kh.demo.vo.MeetingCrewVO;
 import com.kh.demo.vo.MeetingVO;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -45,6 +49,8 @@ public class MeetingRestController {
 	private TokenService tokenService;
 	@Autowired
 	private MeetingMemberDao meetingMemberDao;
+	@Autowired
+	private CrewDao crewDao;
 
 	// 정모 추가
 	@Transactional
@@ -171,5 +177,21 @@ public class MeetingRestController {
 	@GetMapping("/member/{memberNo}")
 	public List<MeetingVO> listByMember(@PathVariable long memberNo) {
 		return meetingDao.selectMeetingListByMember(memberNo);
+	}
+	
+	@GetMapping("/crew/{memberNo}")
+	public List<MeetingCrewVO> listCrewByMember(@PathVariable long memberNo) {
+		List<MeetingCrewVO> list = new ArrayList<>();
+		
+		ModelMapper mapper = new ModelMapper();
+		
+		for (MeetingVO meetingVO : meetingDao.selectMeetingListByMember(memberNo)) {
+			MeetingCrewVO meetingCrewVO = mapper.map(meetingVO, MeetingCrewVO.class);
+			String crewName = crewDao.selectCrewName(meetingVO.getMeetingCrewNo());
+			meetingCrewVO.setMeetingCrewName(crewName);
+			list.add(meetingCrewVO);
+		}
+		
+		return list;
 	}
 }

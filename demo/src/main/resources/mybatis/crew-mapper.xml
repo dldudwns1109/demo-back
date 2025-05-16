@@ -164,6 +164,9 @@
 		)
 	</select>
 
-    
+    <select id="selectCrewName" resultType="String">
+    	select crew_name from crew
+    	where crew_no = #{crewNo}
+    </select>
 
 </mapper>
