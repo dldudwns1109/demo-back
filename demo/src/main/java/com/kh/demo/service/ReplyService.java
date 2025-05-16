@@ -31,5 +31,9 @@ public class ReplyService {
     public boolean delete(Long replyNo, Long replyOrigin, Long userNo) {
         return replyDao.delete(replyNo, replyOrigin, userNo);
     }
+    
+    public void deleteRepliesByCrewAndWriter(Long crewNo, Long memberNo) {
+        replyDao.deleteByCrewAndWriter(crewNo, memberNo);
+    }
 }
 

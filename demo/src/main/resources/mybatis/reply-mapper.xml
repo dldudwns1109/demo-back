@@ -109,6 +109,21 @@
         set board_reply = board_reply - 1
         where board_no = #{replyOrigin}
     </update>
+    
+    <delete id="deleteByCrewAndWriter">
+		DELETE FROM reply
+		WHERE reply_origin IN (
+		SELECT board_no FROM board WHERE board_crew_no = #{crewNo}
+		)
+		AND reply_writer = #{memberNo}
+	</delete>
+	
+	<select id="getReplyCount" resultType="int">
+        SELECT COUNT(*) 
+        FROM reply 
+        WHERE reply_origin = #{boardNo}
+    </select>
+
 
 </mapper>
 
