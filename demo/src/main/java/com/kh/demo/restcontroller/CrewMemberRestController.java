@@ -37,7 +37,6 @@ public class CrewMemberRestController {
 	private BoardService boardService;
 	@Autowired
 	private MemberChatController memberChatController;
-	
 
 	// 모임 가입 처리
 //	@PostMapping("/{crewNo}/join")
@@ -74,30 +73,23 @@ public class CrewMemberRestController {
 //
 //		crewMemberDao.join(crewMemberDto);
 //	}
-	
+
 	@Transactional
 	@PostMapping("/{crewNo}/join")
-	public void join(@PathVariable Long crewNo,
-	                 @RequestHeader("Authorization") String authorizationHeader,
-	                 @RequestBody CrewJoinRequestDto requestDto) {
-	    long memberNo = tokenService.parseBearerToken(authorizationHeader);
-	    String chatContent = requestDto.getChatContent();
+	public void join(@PathVariable Long crewNo, @RequestHeader("Authorization") String authorizationHeader,
+			@RequestBody CrewJoinRequestDto requestDto) {
+		long memberNo = tokenService.parseBearerToken(authorizationHeader);
+		String chatContent = requestDto.getChatContent();
 
-	    // 1. DB에만 가입 처리
-	    long crewMemberNo = crewMemberDao.sequence();
-	    CrewMemberDto crewMemberDto = CrewMemberDto.builder()
-	            .crewMemberNo(crewMemberNo)
-	            .crewNo(crewNo)
-	            .memberNo(memberNo)
-	            .leader("N")
-	            .joinDate(LocalDate.now().toString())
-	            .build();
-	    crewMemberDao.join(crewMemberDto);
+		// 1. DB에만 가입 처리
+		long crewMemberNo = crewMemberDao.sequence();
+		CrewMemberDto crewMemberDto = CrewMemberDto.builder().crewMemberNo(crewMemberNo).crewNo(crewNo)
+				.memberNo(memberNo).leader("N").joinDate(LocalDate.now().toString()).build();
+		crewMemberDao.join(crewMemberDto);
 
-	    // 2. 채팅 메시지 전송은 WebSocket 컨트롤러에 위임
-	    memberChatController.sendJoinWelcomeMessage(crewNo, memberNo, chatContent);
+		// 2. 채팅 메시지 전송은 WebSocket 컨트롤러에 위임
+		memberChatController.sendJoinWelcomeMessage(crewNo, memberNo, chatContent);
 	}
-
 
 	// 모임 탈퇴 처리
 //	@DeleteMapping("/{crewNo}/leave")
@@ -113,31 +105,25 @@ public class CrewMemberRestController {
 //
 //	    return crewMemberDao.leave(crewMemberDto);
 //	}
-	
+
 	// 모임 탈퇴 처리 + 해당 모임에서 작성한 게시글 삭제
 	@DeleteMapping("/{crewNo}/leave")
-	public boolean leave(@PathVariable Long crewNo,
-	                     @RequestHeader("Authorization") String authorizationHeader) {
+	public boolean leave(@PathVariable Long crewNo, @RequestHeader("Authorization") String authorizationHeader) {
 
-	    long memberNo = tokenService.parseBearerToken(authorizationHeader);
+		long memberNo = tokenService.parseBearerToken(authorizationHeader);
 
-	    CrewMemberDto crewMemberDto = CrewMemberDto.builder()
-	            .crewNo(crewNo)
-	            .memberNo(memberNo)
-	            .build();
+		CrewMemberDto crewMemberDto = CrewMemberDto.builder().crewNo(crewNo).memberNo(memberNo).build();
 
-	    // 모임 탈퇴 처리
-	    boolean isLeft = crewMemberDao.leave(crewMemberDto);
+		// 모임 탈퇴 처리
+		boolean isLeft = crewMemberDao.leave(crewMemberDto);
 
-	    // 해당 모임에서 작성한 게시글 삭제
-	    if (isLeft) {
-	        boardService.deleteByCrewAndWriter(crewNo, memberNo);
-	    }
+		// 해당 모임에서 작성한 게시글 삭제
+		if (isLeft) {
+			boardService.deleteByCrewAndWriter(crewNo, memberNo);
+		}
 
-	    return isLeft; 
+		return isLeft;
 	}
-
-
 
 	// 모임장 여부 확인
 //	@GetMapping("/{crewNo}/leader")
@@ -188,24 +174,35 @@ public class CrewMemberRestController {
 	public List<CrewMemberVO> selectListByCrew(@PathVariable Long crewNo) {
 		return crewMemberDao.selectListByCrew(crewNo);
 	}
-//	@GetMapping("/{crewNo}/members")
-//	public List<CrewMemberVO> selectListByCrew(@PathVariable Long crewNo) {
-//	    List<CrewMemberVO> members = crewMemberDao.selectListByCrew(crewNo);
-//	    System.out.println("Fetched Members Data: " + members);
-//	    return members;
-//	}
 
 	// 모임장 회원 강퇴
+//	@DeleteMapping("/{crewNo}/kick/{memberNo}")
+//	public boolean kick(@PathVariable Long crewNo, @PathVariable Long memberNo,
+//			@RequestHeader("Authorization") String token) {
+//		long loginMemberNo = tokenService.parse(token);
+//
+//		// 모임장만 강퇴 가능
+//		CrewMemberDto checkDto = CrewMemberDto.builder().crewNo(crewNo).memberNo(loginMemberNo).build();
+//
+//		if (!crewMemberDao.isLeader(checkDto))
+//			throw new TargetNotFoundException();
+//
+//		CrewMemberDto kickDto = CrewMemberDto.builder().crewNo(crewNo).memberNo(memberNo).build();
+//
+//		return crewMemberDao.kick(kickDto);
+//	}
+
 	@DeleteMapping("/{crewNo}/kick/{memberNo}")
 	public boolean kick(@PathVariable Long crewNo, @PathVariable Long memberNo,
-			@RequestHeader("Authorization") String token) {
-		long loginMemberNo = tokenService.parse(token);
+			@RequestHeader("Authorization") String authorizationHeader) {
 
-		// 모임장만 강퇴 가능
+		long loginMemberNo = tokenService.parseBearerToken(authorizationHeader);
+
 		CrewMemberDto checkDto = CrewMemberDto.builder().crewNo(crewNo).memberNo(loginMemberNo).build();
 
-		if (!crewMemberDao.isLeader(checkDto))
-			throw new TargetNotFoundException();
+		if (!crewMemberDao.isLeader(checkDto)) {
+			return false;
+		}
 
 		CrewMemberDto kickDto = CrewMemberDto.builder().crewNo(crewNo).memberNo(memberNo).build();
 

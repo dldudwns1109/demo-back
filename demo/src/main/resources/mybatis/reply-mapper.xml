@@ -81,10 +81,21 @@
     </update>
 
 	<!-- 댓글 삭제 -->
-    <delete id="delete">
+    <!--<delete id="delete">
         delete from reply
         where reply_no = #{replyNo}
-    </delete>
+    </delete>-->
+    <delete id="delete">
+		delete from reply
+		where reply_no = #{replyNo}
+		and (
+		reply_writer = #{userNo}
+		or reply_origin in (
+		select board_no from board where board_writer = #{userNo}
+		)
+		)
+	</delete>
+
 
 	<!-- 댓글 수 증가/감소 -->
     <update id="updateBoardReplyUp">

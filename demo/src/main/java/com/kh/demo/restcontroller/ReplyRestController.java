@@ -46,9 +46,18 @@ public class ReplyRestController {
     }
 
     // 댓글 삭제
+//    @DeleteMapping("/{replyNo}")
+//    public boolean remove(@PathVariable Long replyNo, @RequestParam Long replyOrigin) {
+//        return replyService.delete(replyNo, replyOrigin);
+//    }
     @DeleteMapping("/{replyNo}")
-    public boolean remove(@PathVariable Long replyNo, @RequestParam Long replyOrigin) {
-        return replyService.delete(replyNo, replyOrigin);
+    public boolean remove(
+            @PathVariable Long replyNo, 
+            @RequestParam Long replyOrigin, 
+            @RequestParam Long userNo) {
+
+        return replyService.delete(replyNo, replyOrigin, userNo);
     }
+
 }
 

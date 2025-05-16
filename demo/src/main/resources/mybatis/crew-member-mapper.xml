@@ -113,6 +113,7 @@
 		delete from crew_member
 		where crew_no = #{crewNo}
 		and member_no = #{memberNo}
+		and leader = 'N'
 	</delete>
 
 	<select id="findCreated" resultType="long">

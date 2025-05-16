@@ -36,12 +36,31 @@ public class ReplyDao {
         return sqlSession.update("reply.update", replyDto) > 0;
     }
 
-    public boolean delete(Long replyNo, Long replyOrigin) {
-        int result = sqlSession.delete("reply.delete", replyNo);
+//    public boolean delete(Long replyNo, Long replyOrigin) {
+//        int result = sqlSession.delete("reply.delete", replyNo);
+//        if (result > 0) {
+//            sqlSession.update("reply.updateBoardReplyDown", replyOrigin);
+//        }
+//        return result > 0;
+//    }
+    
+    public boolean delete(Long replyNo, Long replyOrigin, Long userNo) {
+        Map<String, Object> param = new HashMap<>();
+        param.put("replyNo", replyNo);
+        param.put("replyOrigin", replyOrigin);
+        param.put("userNo", userNo);
+
+        int result = sqlSession.delete("reply.delete", param);
+
         if (result > 0) {
             sqlSession.update("reply.updateBoardReplyDown", replyOrigin);
         }
+
         return result > 0;
     }
+
+
+
+    
 }
 

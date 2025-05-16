@@ -28,8 +28,8 @@ public class ReplyService {
         return replyDao.update(replyDto);
     }
 
-    public boolean delete(Long replyNo, Long replyOrigin) {
-        return replyDao.delete(replyNo, replyOrigin);
+    public boolean delete(Long replyNo, Long replyOrigin, Long userNo) {
+        return replyDao.delete(replyNo, replyOrigin, userNo);
     }
 }
 
