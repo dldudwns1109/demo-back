@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -19,9 +20,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.kh.demo.dao.CrewMemberDao;
 import com.kh.demo.dao.MeetingDao;
 import com.kh.demo.dao.MeetingMemberDao;
 import com.kh.demo.dto.AttachmentDto;
+import com.kh.demo.dto.CrewMemberDto;
 import com.kh.demo.dto.MeetingDto;
 import com.kh.demo.dto.MeetingMemberDto;
 import com.kh.demo.service.AttachmentService;
@@ -45,6 +48,8 @@ public class MeetingRestController {
 	private TokenService tokenService;
 	@Autowired
 	private MeetingMemberDao meetingMemberDao;
+	@Autowired
+	private CrewMemberDao crewMemberDao;
 
 	// 정모 추가
 	@Transactional
@@ -131,10 +136,35 @@ public class MeetingRestController {
 
 	// 정모 상세
 	@GetMapping("/{meetingNo}")
-	public MeetingVO detail(@PathVariable Long meetingNo) {
-	    System.out.println("정모 번호: " + meetingNo);
-	    return meetingDao.selectVO(meetingNo);
+	public ResponseEntity<MeetingVO> detail(
+	    @PathVariable Long meetingNo,
+	    @RequestHeader("Authorization") String token
+	) {
+	    // 1. 로그인 사용자 확인
+	    Long memberNo = tokenService.parseBearerToken(token);
+
+	    // 2. 정모 정보 조회
+	    MeetingVO vo = meetingDao.selectVO(meetingNo);
+	    if (vo == null) {
+	        return ResponseEntity.notFound().build(); // 404
+	    }
+
+	    // 3. 해당 모임(crew)의 가입 여부 확인
+	    boolean isMember = crewMemberDao.isMember(
+	        CrewMemberDto.builder()
+	            .crewNo(vo.getMeetingCrewNo())
+	            .memberNo(memberNo)
+	            .build()
+	    );
+
+	    if (!isMember) {
+	        return ResponseEntity.status(403).build(); // 403 Forbidden
+	    }
+
+	    // 4. 통과 시 정모 정보 반환
+	    return ResponseEntity.ok(vo);
 	}
+
 	
 	// 정모 목록 조회 (특정 crewNo 기준)
 	@GetMapping("/list/{crewNo}")
@@ -151,22 +181,24 @@ public class MeetingRestController {
 	    @RequestHeader("Authorization") String bearerToken
 	) {
 	    long requesterNo = tokenService.parseBearerToken(bearerToken);
-	    MeetingVO meeting = meetingDao.selectVO(meetingNo);
 
-	    // 요청자가 현재 모임장이 아니면 실패
+	    // meeting_owner_no 검증 (기존 모임장인지)
+	    MeetingVO meeting = meetingDao.selectVO(meetingNo);
 	    if (meeting == null || !meeting.getMeetingOwnerNo().equals(requesterNo)) {
 	        return false;
 	    }
 
-	    // 1. meeting 테이블에 owner 변경
-	    boolean result = meetingDao.updateOwner(meetingNo, newOwnerNo);
-	    if (!result) return false;
+	    // 1. meeting 테이블 owner 변경
+	    boolean updated = meetingDao.updateOwner(meetingNo, newOwnerNo);
+	    if (!updated) return false;
 
-	    // 2. meeting_member 테이블에서 is_leader 상태 업데이트
-	    meetingMemberDao.updateLeaderStatus(meetingNo, newOwnerNo); // DAO에 아래 메서드 필요
+	    // 2. meeting_member 테이블 leader 변경
+	    meetingMemberDao.updateLeaderStatus(meetingNo, newOwnerNo);
 
 	    return true;
 	}
+
+
 
 	@GetMapping("/member/{memberNo}")
 	public List<MeetingVO> listByMember(@PathVariable long memberNo) {
