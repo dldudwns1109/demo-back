@@ -73,8 +73,8 @@ public class BoardService {
         boardDao.deleteByWriter(memberNo);
     }
     
- // 특정 모임에서 특정 회원이 작성한 게시글 삭제
-    public void deleteByCrewAndWriter(Long crewNo, Long memberNo) {
+	// 특정 모임에서 특정 회원이 작성한 게시글 삭제
+    public void deleteBoardsByCrewAndWriter(Long crewNo, Long memberNo) {
         boardDao.deleteByCrewAndWriter(crewNo, memberNo);
     }
 

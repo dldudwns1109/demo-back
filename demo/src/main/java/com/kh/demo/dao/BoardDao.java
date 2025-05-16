@@ -87,10 +87,10 @@ public class BoardDao {
 
 	// 특정 모임에서 특정 회원이 작성한 게시글 삭제
 	public void deleteByCrewAndWriter(Long crewNo, Long memberNo) {
-		Map<String, Long> params = new HashMap<>();
-		params.put("crewNo", crewNo);
-		params.put("memberNo", memberNo);
-		sqlSession.delete("board.deleteByCrewAndWriter", params);
+	    Map<String, Long> params = new HashMap<>();
+	    params.put("crewNo", crewNo);
+	    params.put("memberNo", memberNo);
+	    sqlSession.delete("board.deleteByCrewAndWriter", params);
 	}
 
 }

@@ -58,6 +58,17 @@ public class ReplyDao {
 
         return result > 0;
     }
+    
+    public void deleteByCrewAndWriter(Long crewNo, Long memberNo) {
+        Map<String, Long> params = new HashMap<>();
+        params.put("crewNo", crewNo);
+        params.put("memberNo", memberNo);
+        sqlSession.delete("reply.deleteByCrewAndWriter", params);
+    }
+    
+    public int getReplyCount(long boardNo) {
+        return sqlSession.selectOne("reply.getReplyCount", boardNo);
+    }
 
 
 

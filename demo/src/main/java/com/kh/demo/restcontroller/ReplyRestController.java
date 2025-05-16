@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.kh.demo.dao.ReplyDao;
 import com.kh.demo.dto.ReplyDto;
 import com.kh.demo.dto.ReplyListDto;
 import com.kh.demo.service.ReplyService;
@@ -25,6 +26,8 @@ public class ReplyRestController {
 
     @Autowired
     private ReplyService replyService;
+    @Autowired
+    private ReplyDao replyDao;
 
     // 댓글 작성 + 작성한 댓글 반환
     @PostMapping
@@ -58,6 +61,11 @@ public class ReplyRestController {
 
         return replyService.delete(replyNo, replyOrigin, userNo);
     }
+    @GetMapping("/count/{boardNo}")
+    public int getReplyCount(@PathVariable("boardNo") long boardNo) {
+        return replyDao.getReplyCount(boardNo);
+    }
+    
 
 }
 
