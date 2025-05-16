@@ -23,7 +23,6 @@ import com.kh.demo.dto.ChatReadDto;
 import com.kh.demo.dto.MemberDto;
 import com.kh.demo.service.TokenService;
 import com.kh.demo.vo.websocket.ChatUserVO;
-import com.kh.demo.vo.websocket.MemberChatMessageVO;
 import com.kh.demo.vo.websocket.MemberChatResponseVO;
 import com.kh.demo.vo.websocket.MemberChatRoomResponseVO;
 import com.kh.demo.vo.websocket.MemberChatVO;
@@ -202,66 +201,4 @@ public class MemberChatController {
 			.build()
 		);
 	}
-	
-    public void sendJoinWelcomeMessage(long crewNo, long memberNo, String chatContent) {
-        MemberDto memberDto = memberDao.findMemberByNo(memberNo);
-        String memberName = memberDto.getMemberNickname();
-
-        Long crewChatRoomNo = chatDao.findRoomByCrewNo(crewNo);
-        if (crewChatRoomNo != null) {
-            ChatDto welcomeMessage = ChatDto.builder()
-                    .chatRoomNo(crewChatRoomNo)
-                    .chatCrewNo(crewNo)
-                    .chatType("SYSTEM")
-                    .chatContent(memberName + "님이 들어오셨습니다!\n" + chatContent)
-                    .chatTime(new Timestamp(System.currentTimeMillis()))
-                    .chatSender(memberNo)
-                    .build();
-
-            chatDao.insert(welcomeMessage);
-
-            MemberChatMessageVO vo = MemberChatMessageVO.builder()
-            	    .roomNo(crewChatRoomNo)
-            	    .senderNo(memberNo)
-            	    .receiverNo(null)
-            	    .senderNickname(memberName)
-            	    .content(welcomeMessage.getChatContent())
-            	    .type("SYSTEM")
-            	    .time(LocalDateTime.now())
-            	    .build();
-
-            	messagingTemplate.convertAndSend("/private/member/chat/" + crewChatRoomNo, vo);
-        }
-
-        long leaderNo = crewMemberDao.findLeaderMemberNo(crewNo);
-        if (leaderNo != memberNo) {
-            Long dmRoomNo = chatDao.findDmRoom(memberNo, leaderNo);
-            if (dmRoomNo == null) {
-                dmRoomNo = chatDao.roomSequence();
-            }
-
-            ChatDto dmMessage = ChatDto.builder()
-                    .chatRoomNo(dmRoomNo)
-                    .chatType("DM")
-                    .chatContent(memberName + "님이 모임에 가입했습니다!\n가입인사: " + chatContent)
-                    .chatTime(new Timestamp(System.currentTimeMillis()))
-                    .chatSender(memberNo)
-                    .chatReceiver(leaderNo)
-                    .build();
-
-            chatDao.insert(dmMessage);
-
-            MemberChatMessageVO dmVO = MemberChatMessageVO.builder()
-            	    .roomNo(dmRoomNo) // ✅ DM 채팅방 번호
-            	    .senderNo(memberNo)
-            	    .receiverNo(leaderNo)
-            	    .senderNickname(memberName)
-            	    .content(dmMessage.getChatContent()) // ✅ DM 메시지 내용
-            	    .type("DM")
-            	    .time(LocalDateTime.now())
-            	    .build();
-
-            	messagingTemplate.convertAndSend("/private/member/chat/" + leaderNo, dmVO);
-        }
-    }
 }

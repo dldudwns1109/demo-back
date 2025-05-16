@@ -57,23 +57,23 @@
 		where c.chat_no = #{chatNo}
 	</update>
 	
-	<select id="findChatByRoomNo" resultType="long">
+	<select id="findChatByRoomNo" resultType="Long">
 		select chat_no from chat
 		where chat_room_no = #{chatRoomNo}
 	</select>
 	
-	<select id="findRoomByCrewNo" resultType="long">
-	    SELECT chat_room_no
-	    FROM (
-	        SELECT chat_room_no
-	        FROM chat
-	        WHERE chat_type = 'CREW'
-	          AND chat_crew_no = #{crewNo}
-	        ORDER BY chat_time DESC
-	    )
-	    WHERE ROWNUM = 1
+	<select id="findRoomByCrewNo" resultType="Long">
+		SELECT chat_room_no
+		FROM (
+		    SELECT chat_room_no
+		    FROM chat
+		    WHERE chat_type IN ('SYSTEM', 'CHAT')
+		      AND chat_crew_no = #{crewNo}
+		    ORDER BY chat_time DESC
+		)
+		WHERE ROWNUM = 1
 	</select>
-	<select id="findDmRoom" resultType="long">
+	<select id="findDmRoom" resultType="Long">
 	    SELECT chat_room_no
 	    FROM (
 	        SELECT chat_room_no
