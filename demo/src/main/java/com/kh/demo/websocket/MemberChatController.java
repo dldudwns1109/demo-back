@@ -203,75 +203,75 @@ public class MemberChatController {
 		);
 	}
 	
-	public void sendJoinWelcomeMessage(long crewNo, long memberNo, String chatContent) {
-	    MemberDto memberDto = memberDao.findMemberByNo(memberNo);
-	    String memberName = memberDto.getMemberNickname();
-
-	    Long chatRoomNo = chatDao.findRoomByCrewNo(crewNo);
-	    log.debug("chatRoomNo = {}", chatRoomNo);
-	    
-	    if (chatRoomNo != null) {
-	        long systemChatNo = chatDao.sequence(); // 💡 시퀀스 할당
-
-	        ChatDto welcomeMessage = ChatDto.builder()
-	                .chatNo(systemChatNo)
-	                .chatRoomNo(chatRoomNo)
-	                .chatCrewNo(crewNo)
-	                .chatType("SYSTEM")
-	                .chatContent(memberName + "님이 들어오셨습니다!\n")
-	                .chatTime(new Timestamp(System.currentTimeMillis()))
-	                .chatSender(memberNo)
-	                .chatRead(0L)
-	                .build();
-
-	        chatDao.insert(welcomeMessage);
-
-	        MemberChatMessageVO vo = MemberChatMessageVO.builder()
-	                .roomNo(chatRoomNo)
-	                .senderNo(memberNo)
-	                .receiverNo(null)
-	                .senderNickname(memberName)
-	                .content(welcomeMessage.getChatContent())
-	                .type("SYSTEM")
-	                .time(LocalDateTime.now())
-	                .build();
-
-	        messagingTemplate.convertAndSend("/private/member/chat/" + chatRoomNo, vo);
-	    }
-
-	    long leaderNo = crewMemberDao.findLeaderMemberNo(crewNo);
-	    if (leaderNo != memberNo) {
-	        Long dmRoomNo = chatDao.findDmRoom(memberNo, leaderNo);
-	        if (dmRoomNo == null) {
-	            dmRoomNo = chatDao.roomSequence();
-	        }
-
-	        long dmChatNo = chatDao.sequence(); // 💡 DM 채팅 메시지용 시퀀스
-
-	        ChatDto dmMessage = ChatDto.builder()
-	                .chatNo(dmChatNo)
-	                .chatRoomNo(dmRoomNo)
-	                .chatType("DM")
-	                .chatContent(chatContent)
-	                .chatTime(new Timestamp(System.currentTimeMillis()))
-	                .chatSender(memberNo)
-	                .chatReceiver(leaderNo)
-	                .chatRead(1L)
-	                .build();
-
-	        chatDao.insert(dmMessage);
-
-	        MemberChatMessageVO dmVO = MemberChatMessageVO.builder()
-	                .roomNo(dmRoomNo)
-	                .senderNo(memberNo)
-	                .receiverNo(leaderNo)
-	                .senderNickname(memberName)
-	                .content(dmMessage.getChatContent())
-	                .type("DM")
-	                .time(LocalDateTime.now())
-	                .build();
-
-	        messagingTemplate.convertAndSend("/private/member/chat/" + leaderNo, dmVO);
-	    }
-	}
+//	public void sendJoinWelcomeMessage(long crewNo, long memberNo, String chatContent) {
+//	    MemberDto memberDto = memberDao.findMemberByNo(memberNo);
+//	    String memberName = memberDto.getMemberNickname();
+//
+//	    Long chatRoomNo = chatDao.findRoomByCrewNo(crewNo);
+//	    log.debug("chatRoomNo = {}", chatRoomNo);
+//	    
+//	    if (chatRoomNo != null) {
+//	        long systemChatNo = chatDao.sequence(); // 💡 시퀀스 할당
+//
+//	        ChatDto welcomeMessage = ChatDto.builder()
+//	                .chatNo(systemChatNo)
+//	                .chatRoomNo(chatRoomNo)
+//	                .chatCrewNo(crewNo)
+//	                .chatType("SYSTEM")
+//	                .chatContent(memberName + "님이 들어오셨습니다!\n")
+//	                .chatTime(new Timestamp(System.currentTimeMillis()))
+//	                .chatSender(memberNo)
+//	                .chatRead(0L)
+//	                .build();
+//
+//	        chatDao.insert(welcomeMessage);
+//
+//	        MemberChatMessageVO vo = MemberChatMessageVO.builder()
+//	                .roomNo(chatRoomNo)
+//	                .senderNo(memberNo)
+//	                .receiverNo(null)
+//	                .senderNickname(memberName)
+//	                .content(welcomeMessage.getChatContent())
+//	                .type("SYSTEM")
+//	                .time(LocalDateTime.now())
+//	                .build();
+//
+//	        messagingTemplate.convertAndSend("/private/member/chat/" + chatRoomNo, vo);
+//	    }
+//
+//	    long leaderNo = crewMemberDao.findLeaderMemberNo(crewNo);
+//	    if (leaderNo != memberNo) {
+//	        Long dmRoomNo = chatDao.findDmRoom(memberNo, leaderNo);
+//	        if (dmRoomNo == null) {
+//	            dmRoomNo = chatDao.roomSequence();
+//	        }
+//
+//	        long dmChatNo = chatDao.sequence(); // 💡 DM 채팅 메시지용 시퀀스
+//
+//	        ChatDto dmMessage = ChatDto.builder()
+//	                .chatNo(dmChatNo)
+//	                .chatRoomNo(dmRoomNo)
+//	                .chatType("DM")
+//	                .chatContent(chatContent)
+//	                .chatTime(new Timestamp(System.currentTimeMillis()))
+//	                .chatSender(memberNo)
+//	                .chatReceiver(leaderNo)
+//	                .chatRead(1L)
+//	                .build();
+//
+//	        chatDao.insert(dmMessage);
+//
+//	        MemberChatMessageVO dmVO = MemberChatMessageVO.builder()
+//	                .roomNo(dmRoomNo)
+//	                .senderNo(memberNo)
+//	                .receiverNo(leaderNo)
+//	                .senderNickname(memberName)
+//	                .content(dmMessage.getChatContent())
+//	                .type("DM")
+//	                .time(LocalDateTime.now())
+//	                .build();
+//
+//	        messagingTemplate.convertAndSend("/private/member/chat/" + leaderNo, dmVO);
+//	    }
+//	}
 }

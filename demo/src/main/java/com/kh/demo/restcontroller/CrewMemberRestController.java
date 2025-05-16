@@ -20,9 +20,9 @@ import com.kh.demo.dto.CrewJoinRequestDto;
 import com.kh.demo.dto.CrewMemberDto;
 import com.kh.demo.error.TargetNotFoundException;
 import com.kh.demo.service.BoardService;
+import com.kh.demo.service.ChatService;
 import com.kh.demo.service.TokenService;
 import com.kh.demo.vo.CrewMemberVO;
-import com.kh.demo.websocket.MemberChatController;
 
 @CrossOrigin
 @RestController
@@ -36,7 +36,7 @@ public class CrewMemberRestController {
 	@Autowired
 	private BoardService boardService;
 	@Autowired
-	private MemberChatController memberChatController;
+	private ChatService chatService;
 	
 
 	// 모임 가입 처리
@@ -83,7 +83,6 @@ public class CrewMemberRestController {
 	    long memberNo = tokenService.parseBearerToken(authorizationHeader);
 	    String chatContent = requestDto.getChatContent();
 
-	    // 1. DB에만 가입 처리
 	    long crewMemberNo = crewMemberDao.sequence();
 	    CrewMemberDto crewMemberDto = CrewMemberDto.builder()
 	            .crewMemberNo(crewMemberNo)
@@ -94,8 +93,8 @@ public class CrewMemberRestController {
 	            .build();
 	    crewMemberDao.join(crewMemberDto);
 
-	    // 2. 채팅 메시지 전송은 WebSocket 컨트롤러에 위임
-	    memberChatController.sendJoinWelcomeMessage(crewNo, memberNo, chatContent);
+	    chatService.sendJoinSystemMessage(crewNo, memberNo); // 시스템 메세지
+	    chatService.sendJoinDmMessage(crewNo, memberNo, chatContent); // 가입인사 DM
 	}
 
 
@@ -114,11 +113,9 @@ public class CrewMemberRestController {
 //	    return crewMemberDao.leave(crewMemberDto);
 //	}
 	
-	// 모임 탈퇴 처리 + 해당 모임에서 작성한 게시글 삭제
 	@DeleteMapping("/{crewNo}/leave")
 	public boolean leave(@PathVariable Long crewNo,
 	                     @RequestHeader("Authorization") String authorizationHeader) {
-
 	    long memberNo = tokenService.parseBearerToken(authorizationHeader);
 
 	    CrewMemberDto crewMemberDto = CrewMemberDto.builder()
@@ -126,16 +123,18 @@ public class CrewMemberRestController {
 	            .memberNo(memberNo)
 	            .build();
 
-	    // 모임 탈퇴 처리
 	    boolean isLeft = crewMemberDao.leave(crewMemberDto);
 
-	    // 해당 모임에서 작성한 게시글 삭제
 	    if (isLeft) {
 	        boardService.deleteByCrewAndWriter(crewNo, memberNo);
+
+	        // 💬 탈퇴 메시지 전송
+	        chatService.sendLeaveSystemMessage(crewNo, memberNo);
 	    }
 
-	    return isLeft; 
+	    return isLeft;
 	}
+
 
 
 
