@@ -1,6 +1,7 @@
 package com.kh.demo.service;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,8 +9,12 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.kh.demo.dao.MeetingDao;
+import com.kh.demo.dao.MeetingMemberDao;
 import com.kh.demo.dao.MemberDao;
+import com.kh.demo.dto.MeetingMemberDto;
 import com.kh.demo.dto.MemberDto;
 import com.kh.demo.dto.MemberLikeDto;
 import com.kh.demo.util.RandomGenerator;
@@ -32,6 +37,12 @@ public class MemberService {
 	
 	@Autowired
 	private RandomGenerator randomGenerator;
+	
+	@Autowired
+	private MeetingMemberDao meetingMemberDao;
+	
+	@Autowired
+	private MeetingDao meetingDao;
 	
 	public long signup(MemberVO memberVO) {
 		ModelMapper mapper = new ModelMapper();
@@ -110,4 +121,28 @@ public class MemberService {
 	    return memberDao.updatePasswordByNo(findDto); // 새로 만든 쿼리 사용
 	}
 	
+	/**
+     * crewNo 소속 정모 중에서 memberNo가 leader 였다면
+     *  - 후임을 위임하거나
+     *  - 혼자 남았으면 정모 자체를 삭제
+     */
+    @Transactional
+    public void reassignOrDeleteMeetings(Long crewNo, Long memberNo) {
+        List<Long> meetingNos = meetingMemberDao
+            .findMeetingNoListByCrewNoAndMemberNo(crewNo, memberNo);
+
+        for (Long meetingNo : meetingNos) {
+            if (!meetingMemberDao.isLeader(meetingNo, memberNo)) continue;
+
+            List<MeetingMemberDto> others = meetingMemberDao.findOthers(meetingNo, memberNo);
+            if (others.isEmpty()) {
+                meetingDao.delete(meetingNo);
+            } else {
+                long newLeader = others.get(0).getMemberNo();
+                meetingMemberDao.updateLeaderStatus(meetingNo, newLeader);
+                meetingDao.updateOwner(meetingNo, newLeader);
+                meetingMemberDao.delete(meetingNo, memberNo);
+            }
+        }
+    }
 }

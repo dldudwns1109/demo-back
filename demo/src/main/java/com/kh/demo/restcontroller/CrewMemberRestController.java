@@ -23,6 +23,7 @@ import com.kh.demo.dto.CrewMemberDto;
 import com.kh.demo.dto.MeetingMemberDto;
 import com.kh.demo.service.BoardService;
 import com.kh.demo.service.ChatService;
+import com.kh.demo.service.MemberService;
 import com.kh.demo.service.ReplyService;
 import com.kh.demo.service.TokenService;
 import com.kh.demo.vo.CrewMemberVO;
@@ -46,6 +47,8 @@ public class CrewMemberRestController {
 	private MeetingDao meetingDao;
 	@Autowired
 	private ReplyService replyService;
+	@Autowired
+	private MemberService memberService;
 
 	// 모임 가입 처리
 	@Transactional
@@ -63,22 +66,35 @@ public class CrewMemberRestController {
 		chatService.sendJoinSystemMessage(crewNo, memberNo); // 시스템 메세지
 		chatService.sendJoinDmMessage(crewNo, memberNo, chatContent); // 가입인사 DM
 	}
+	
+	@Transactional
 	@DeleteMapping("/{crewNo}/leave")
-	public boolean leave(@PathVariable Long crewNo, @RequestHeader("Authorization") String authorizationHeader) {
-		long memberNo = tokenService.parseBearerToken(authorizationHeader);
+    public boolean leaveCrew(
+            @PathVariable Long crewNo,
+            @RequestHeader("Authorization") String authHeader) {
 
-		CrewMemberDto memberInfo = CrewMemberDto.builder().crewNo(crewNo).memberNo(memberNo).build();
+        long memberNo = tokenService.parseBearerToken(authHeader);
 
-		boolean isLeft = crewMemberDao.leave(memberInfo);
+        // 1) 정모장 위임/삭제 처리
+        memberService.reassignOrDeleteMeetings(crewNo, memberNo);
 
-		if (isLeft) {
-			replyService.deleteRepliesByCrewAndWriter(crewNo, memberNo);
-			boardService.deleteBoardsByCrewAndWriter(crewNo, memberNo);
-			chatService.sendLeaveSystemMessage(crewNo, memberNo);
-		}
+        // 2) 실제 탈퇴
+        boolean isLeft = crewMemberDao.leave(
+            CrewMemberDto.builder()
+                         .crewNo(crewNo)
+                         .memberNo(memberNo)
+                         .build()
+        );
 
-		return isLeft;
-	}
+        // 3) 탈퇴 후 후속 작업
+        if (isLeft) {
+            replyService.deleteRepliesByCrewAndWriter(crewNo, memberNo);
+            boardService.deleteBoardsByCrewAndWriter(crewNo, memberNo);
+            chatService.sendLeaveSystemMessage(crewNo, memberNo);
+        }
+
+        return isLeft;
+    }
 
 	// 모임장 여부 확인
 	@GetMapping("/{crewNo}/leader")
@@ -120,6 +136,7 @@ public class CrewMemberRestController {
 
 	
 	// 모임장 회원 강퇴
+	@Transactional
 	@DeleteMapping("/{crewNo}/kick/{memberNo}")
 	public boolean kick(
 	        @PathVariable Long crewNo,
@@ -137,47 +154,21 @@ public class CrewMemberRestController {
 	        return false;
 	    }
 
-	    // 강퇴 대상이 참여한 정모 목록 조회 (해당 모임 내)
-	    List<Long> meetingNoList = meetingMemberDao.findMeetingNoListByCrewNoAndMemberNo(crewNo, memberNo);
+        // 1) 미팅 리더 교체/삭제
+        memberService.reassignOrDeleteMeetings(crewNo, memberNo);
 
-	    for (Long meetingNo : meetingNoList) {
-	        if (meetingMemberDao.isLeader(meetingNo, memberNo)) {
-	            // 정모장일 경우
-	            List<MeetingMemberDto> others = meetingMemberDao.findOthers(meetingNo, memberNo);
+        // 2) 크루에서 강퇴
+        boolean kicked = crewMemberDao.kick(
+            CrewMemberDto.builder().crewNo(crewNo).memberNo(memberNo).build()
+        );
+        if (!kicked) return false;
 
-	            if (others.isEmpty()) {
-	                // 혼자였다면 정모 삭제
-	                meetingDao.delete(meetingNo);
-	            } else {
-	                // 위임 대상 선정
-	                MeetingMemberDto nextLeader = others.get(0);
+        // 3) 후속 작업
+        replyService.deleteRepliesByCrewAndWriter(crewNo, memberNo);
+        boardService.deleteBoardsByCrewAndWriter(crewNo, memberNo);
+        chatService.sendKickSystemMessage(crewNo, memberNo);
 
-	                // 1. meeting_member 테이블에서 리더 변경
-	                meetingMemberDao.updateLeaderStatus(meetingNo, nextLeader.getMemberNo());
-	                // 2. meeting 테이블의 ownerNo도 같이 변경
-	                meetingDao.updateOwner(meetingNo, nextLeader.getMemberNo());
-	                // 3. 기존 리더 삭제
-	                meetingMemberDao.delete(meetingNo, memberNo);
-	            }
-	        }
-	    }  
+        return true;
+    }
 
-	    // 모임에서 최종 강퇴
-	    CrewMemberDto kickDto = CrewMemberDto.builder()
-	            .crewNo(crewNo)
-	            .memberNo(memberNo)
-	            .build();
-
-	    boolean isLeft = crewMemberDao.kick(kickDto);
-
-	    if (isLeft) {
-	        // 강퇴 메시지 전송
-	        chatService.sendKickSystemMessage(crewNo, memberNo);
-	        // 강퇴된 멤버의 댓글/게시글 삭제
-	        replyService.deleteRepliesByCrewAndWriter(crewNo, memberNo);
-	        boardService.deleteBoardsByCrewAndWriter(crewNo, memberNo);
-	    }
-
-	    return isLeft;
-	}
 }
