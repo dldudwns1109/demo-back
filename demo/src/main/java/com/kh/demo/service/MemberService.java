@@ -126,23 +126,27 @@ public class MemberService {
      *  - 후임을 위임하거나
      *  - 혼자 남았으면 정모 자체를 삭제
      */
-    @Transactional
-    public void reassignOrDeleteMeetings(Long crewNo, Long memberNo) {
-        List<Long> meetingNos = meetingMemberDao
-            .findMeetingNoListByCrewNoAndMemberNo(crewNo, memberNo);
+	@Transactional
+	public void reassignOrDeleteMeetings(Long crewNo, Long memberNo) {
+	    List<Long> meetingNos = meetingMemberDao
+	        .findMeetingNoListByCrewNoAndMemberNo(crewNo, memberNo);
 
-        for (Long meetingNo : meetingNos) {
-            if (!meetingMemberDao.isLeader(meetingNo, memberNo)) continue;
+	    for (Long meetingNo : meetingNos) {
+	        if (meetingMemberDao.isLeader(meetingNo, memberNo)) {
+	            List<MeetingMemberDto> others = meetingMemberDao.findOthers(meetingNo, memberNo);
+	            if (others.isEmpty()) {
+	                meetingDao.delete(meetingNo); // 정모 삭제
+	                continue;
+	            } else {
+	                long newLeader = others.get(0).getMemberNo();
+	                meetingMemberDao.updateLeaderStatus(meetingNo, newLeader);
+	                meetingDao.updateOwner(meetingNo, newLeader);
+	            }
+	        }
 
-            List<MeetingMemberDto> others = meetingMemberDao.findOthers(meetingNo, memberNo);
-            if (others.isEmpty()) {
-                meetingDao.delete(meetingNo);
-            } else {
-                long newLeader = others.get(0).getMemberNo();
-                meetingMemberDao.updateLeaderStatus(meetingNo, newLeader);
-                meetingDao.updateOwner(meetingNo, newLeader);
-                meetingMemberDao.delete(meetingNo, memberNo);
-            }
-        }
-    }
+	        // 리더 여부 상관없이 삭제
+	        meetingMemberDao.delete(meetingNo, memberNo);
+	    }
+	}
+
 }
