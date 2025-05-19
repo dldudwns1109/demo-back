@@ -163,6 +163,17 @@
 		select crew_no from crew_member where member_no = #{memberno}
 		)
 	</select>
+	
+	<select id="findCrewNameByNo" resultType="string">
+		SELECT crew_name
+		FROM crew
+		WHERE crew_no = #{crewNo}
+	</select>
+	
+	<select id="findCrewName" resultType="string" parameterType="long">
+		SELECT crew_name FROM crew WHERE crew_no = #{crewNo}
+	</select>
+
 
     <select id="selectCrewName" resultType="String">
     	select crew_name from crew
