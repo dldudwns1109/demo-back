@@ -24,7 +24,7 @@ public class CrewDao {
 	public List<CrewVO> selectList() {
 		return sqlSession.selectList("crew.selectList");
 	}
-	
+
 	public List<CrewDto> selectSearch(SearchVO searchVO) {
 		return sqlSession.selectList("crew.selectSearch", searchVO);
 	}
@@ -36,11 +36,12 @@ public class CrewDao {
 
 	// 모임 등록
 	public long sequence() {
-	    return sqlSession.selectOne("crew.sequence");
+		return sqlSession.selectOne("crew.sequence");
 	}
+
 	public CrewDto insert(CrewDto crewDto) {
-	    sqlSession.insert("crew.insert", crewDto);
-	    return crewDto;
+		sqlSession.insert("crew.insert", crewDto);
+		return crewDto;
 	}
 
 	// 모임 수정
@@ -52,7 +53,7 @@ public class CrewDao {
 	public boolean delete(Long crewNo) {
 		return sqlSession.delete("crew.delete", crewNo) > 0;
 	}
-	
+
 	// 이미지 연결
 	public void connect(CrewDto crewDto, AttachmentDto attachmentDto) {
 		Map<String, Object> params = new HashMap<>();
@@ -60,43 +61,50 @@ public class CrewDao {
 		params.put("attachmentNo", attachmentDto.getAttachmentNo());
 		sqlSession.insert("crew.connect", params);
 	}
-	
+
 	public void connect(Long crewNo, Long attachmentNo) {
-	    Map<String, Object> params = new HashMap<>();
-	    params.put("crewNo", crewNo);
-	    params.put("attachmentNo", attachmentNo);
-	    sqlSession.insert("crew.connect", params);
+		Map<String, Object> params = new HashMap<>();
+		params.put("crewNo", crewNo);
+		params.put("attachmentNo", attachmentNo);
+		sqlSession.insert("crew.connect", params);
 	}
-	
+
 	// 이미지 찾기
 	public long findImage(long crewNo) {
 		return sqlSession.selectOne("crew.findImage", crewNo);
 	}
-	
+
 	public void updateLike(CrewLikeDto crewLikeDto) {
 		sqlSession.insert("crew.updateLike", crewLikeDto);
 	}
-	
+
 	public boolean deleteLike(CrewLikeDto crewLikeDto) {
 		return sqlSession.delete("crew.deleteLike", crewLikeDto) > 0;
 	}
-	
+
 	public boolean selectLike(CrewLikeDto crewLikeDto) {
-		if (sqlSession.selectOne("crew.selectLike", 
-				crewLikeDto) == null)
+		if (sqlSession.selectOne("crew.selectLike", crewLikeDto) == null)
 			return false;
 		return true;
 	}
-	
+
 	public List<CrewDto> selectLikedGroup(List<String> memberLike) {
 		return sqlSession.selectList("crew.selectLikedCrew", memberLike);
 	}
-	
+
 	public List<CrewDto> selectGroupByNo(long crewNo) {
 		return sqlSession.selectList("crew.find", crewNo);
 	}
-	
-	 public List<CrewDto> selectJoinedCrews(Long memberNo) {
-	        return sqlSession.selectList("crew.selectjoinedcrews", memberNo);
-	    }
+
+	public List<CrewDto> selectJoinedCrews(Long memberNo) {
+		return sqlSession.selectList("crew.selectjoinedcrews", memberNo);
+	}
+
+	// 모임명 조회
+	public String findCrewNameByNo(Long crewNo) {
+		return sqlSession.selectOne("crew.findCrewNameByNo", crewNo);
+	}
+	public String findCrewName(Long crewNo) {
+	    return sqlSession.selectOne("crew.findCrewName", crewNo);
+	}
 }

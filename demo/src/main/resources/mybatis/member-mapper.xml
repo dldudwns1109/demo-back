@@ -128,7 +128,7 @@
     	WHERE member_no = #{memberNo}
 	</select>
 	
-	<select id="findNicknameById" resultType="string">
+	<select id="findNicknameById" resultType="string" parameterType="long">
 	    SELECT member_nickname
 	    FROM member
 	    WHERE member_no = #{memberNo}

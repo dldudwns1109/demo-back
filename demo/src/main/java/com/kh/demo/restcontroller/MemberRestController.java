@@ -254,4 +254,13 @@ public class MemberRestController {
 	public boolean checkPassword(@RequestBody MemberCheckVO memberCheckVO) {
 		return memberService.checkPassword(memberCheckVO);
 	}
+	
+	@GetMapping("/{memberNo}/nickname")
+    public String getMemberNickname(@PathVariable Long memberNo) {
+        return memberDao.findNicknameById(memberNo);
+    }
+	
+	
+	
 }
+
